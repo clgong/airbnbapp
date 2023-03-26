@@ -29,5 +29,5 @@ st.title('AirBnb Rentals in Seattle')
 # Prepare data
 
 # load dataset that has already been cleaned
-raw_df = pd.read_pickle(basepath+'./data/cleaned_v2/cleaned_listing_and_review_with_polarity.zip')
+raw_df = pd.read_pickle('./data/cleaned_v2/cleaned_listing_and_review_with_polarity.zip')
 st.write(raw_df.shape)
