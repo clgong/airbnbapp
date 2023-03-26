@@ -10,6 +10,7 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 
+st.title('AirBnb Rentals in Seattle')
 
 df = pd.DataFrame({
   'first column': [1, 2, 3, 4],
