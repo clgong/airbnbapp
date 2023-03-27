@@ -24,7 +24,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 
 st.title('AirBnb Rentals in Seattle')
-st.write('Hello from team-spirit')
+st.write('Hello from team-spirit :)')
 
 
 # 1. Prepare data
@@ -33,14 +33,14 @@ st.write('Hello from team-spirit')
 raw_df = pd.read_pickle('./data/cleaned_v2/cleaned_listing_and_review_with_polarity.zip')
 
 # Note this will print to the terminal
-print(raw_df.shape)
+#print(raw_df.shape)
 
 # Note this will print to the web app
-raw_df.shape
+#raw_df.shape
 
 # Continue with rest of notebook...
 
-raw_df.columns
+#raw_df.columns
 
 # Some columns we decided to remove with the reason in comments
 
@@ -55,22 +55,22 @@ feature_to_remove = ['host_total_listings_count','host_listings_count', # same d
                     ]
 
 df_model = raw_df.drop(columns=feature_to_remove)
-df_model.shape
+#df_model.shape
 
-df_model.isna().sum()
+#df_model.isna().sum()
 
 # check if any columns have Nan...
 df_model.columns[df_model.isna().any()].tolist()
 
 # remove na polarity rows, polarity is numeric, goal is to get all numeric columns
 df_model = df_model.dropna()
-print(df_model.columns[df_model.isna().any()].tolist(), df_model.shape)
-df_model.head(5)
+#print(df_model.columns[df_model.isna().any()].tolist(), df_model.shape)
+#df_model.head(5)
 
 # Reset index so easier to debug later
 
 df_model.reset_index(inplace=True, drop=True)
-df_model.head(5)
+#df_model.head(5)
 
 # TODO: Add in categorical values using one hot encoding
 # TODO: Should we also add in datetime types too since they are kind of numeric?
@@ -80,46 +80,51 @@ df_model.head(5)
 #   is complete
 
 # Take all the numerical columns as features for our model
-df_model.shape
-df_model.dtypes
+#df_model.shape
+#df_model.dtypes
 
 number_types = ['int16', 'int32', 'int64', 'float16', 'float32', 'float64']
 df_model_num = df_model.select_dtypes(include=number_types)
-df_model_num.shape
+#df_model_num.shape
 
-df_model_num.dtypes
+#df_model_num.dtypes
 
 
 # 2. Find cosine similarity between all rental properties
 
 # Build similarity matrix
 
-df_model_num.head(5)
+#df_model_num.head(5)
 
-similarity = cosine_similarity(df_model_num)
+st.write('Similarity matrix')
+@st.cache_data
+def get_sim(df):
+    return cosine_similarity(df)
+
+similarity = get_sim(df_model_num)
 similarity
 
-similarity[500]
+#similarity[500]
 
 
 
 # 3. Recommend top n similar properties
 
 model_columns_all = list(df_model.columns.values)
-model_columns_all[:10]
+#model_columns_all[:10]
 
-ui_display_columns = ['listing_id', 'listing_url',
+ui_display_columns = ['listing_id', 'listing_url', 'polarity',
        'neighbourhood_cleansed', 'neighbourhood_group_cleansed', 'latitude',
        'longitude', 'property_type', 'room_type', 'accommodates', 'bedrooms',
        'beds', 'amenities', 'price', 'review_scores_rating',
        'bathrooms_count', 'amenities_count', 'host_response_time_encoded',
-       'host_operate_years', 'polarity']
+       'host_operate_years']
 
 # Since we're using iloc in our recommender to retrieve the rows,
 #   we need to also use the numeric index for the columns.
 
 iloc_cols = [model_columns_all.index(x) for x in ui_display_columns]
-iloc_cols
+#iloc_cols
 
 
 # Get the recommendations
@@ -158,7 +163,24 @@ df_recs = get_recommendations(df_model, similarity, 5, query_element=500)
 
 # with pd.option_context('display.float_format', '{:0.10f}'.format):
 #     display(df_recs)
-df_recs
+#df_recs
+
+
+st.subheader('Try the recommender in UI')
+
+# select a listing from sd_merged
+selected_listing = st.selectbox("Choose a listing url:", df_model.listing_url)
+df_recs = get_recommendations(df_model, similarity, 5, listing_url=selected_listing)
+
+st.write('Top 5 recommendations')
+st.write(df_recs.style.format({"similarity": "{:0.10f}"}))
+
+
+# You can access the value of a text input like this
+# st.text_input("Your name", key="name")
+# st.session_state.name
+
+
 
 # Search for the simular properties using listing_id
 
