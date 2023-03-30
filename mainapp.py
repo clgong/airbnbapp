@@ -27,6 +27,7 @@ st.title('AirBnb Rentals in Seattle')
 st.write('Hello from team-spirit :)')
 st.write('v0.02')
 st.write('hello world from Xinqian')
+st.write('hello world from Kun')
 
 # 1. Prepare data
 
@@ -34,7 +35,7 @@ st.write('hello world from Xinqian')
 raw_df = pd.read_pickle('./data/cleaned_v2/cleaned_listing_and_review_with_polarity.zip')
 
 # Note this will print to the terminal
-print(raw_df.shape)
+#print(raw_df.shape)
 
 # Note this will print to the web app
 #raw_df.shape
