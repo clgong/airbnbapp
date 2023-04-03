@@ -239,60 +239,60 @@ st.altair_chart(sentiment_plot, use_container_width=True)
 
 
 
-##### add review sentiment report for a recommended listings #####
+# ##### add review sentiment report for a recommended listings #####
 
 
-import re
-from nltk.sentiment.vader import SentimentIntensityAnalyzer
+# import re
+# from nltk.sentiment.vader import SentimentIntensityAnalyzer
 
-def get_review_sentiment_report(df,col,listing_id):
+# def get_review_sentiment_report(df,col,listing_id):
     
-    if listing_id in df['listing_id'].values:
-        # segement all comments into sentences for the given listing
-        review_sentences = df[df['listing_id'] == listing_id]['comments'].apply(lambda x: re.sub("(<.*?>)|([\t\r])","",x)).str.split('.').values.tolist()[0]
-        num_review_sentences = len(review_sentences)
+#     if listing_id in df['listing_id'].values:
+#         # segement all comments into sentences for the given listing
+#         review_sentences = df[df['listing_id'] == listing_id]['comments'].apply(lambda x: re.sub("(<.*?>)|([\t\r])","",x)).str.split('.').values.tolist()[0]
+#         num_review_sentences = len(review_sentences)
         
-        # get polarity score of both the positives and negatives for each sentence in all the comments 
-        neg_sentences = []
-        pos_sentences = []
-        neu_sentences = []
-        # nutrual_comment = []
-        for i, text in enumerate(review_sentences):
-            score = SentimentIntensityAnalyzer().polarity_scores(text)['compound']
-            if score < 0:
-                neg_sentences.append((score,review_sentences[i]))
-            elif score > 0:
-                pos_sentences.append((score,review_sentences[i]))
-            else:
-                neu_sentences.append((score,review_sentences[i]))
+#         # get polarity score of both the positives and negatives for each sentence in all the comments 
+#         neg_sentences = []
+#         pos_sentences = []
+#         neu_sentences = []
+#         # nutrual_comment = []
+#         for i, text in enumerate(review_sentences):
+#             score = SentimentIntensityAnalyzer().polarity_scores(text)['compound']
+#             if score < 0:
+#                 neg_sentences.append((score,review_sentences[i]))
+#             elif score > 0:
+#                 pos_sentences.append((score,review_sentences[i]))
+#             else:
+#                 neu_sentences.append((score,review_sentences[i]))
         
-        neg_percent = round(len(neg_sentences)/num_review_sentences*100,2)
-        pos_percent = round(len(pos_sentences)/num_review_sentences*100,2)   
-        neu_percent = round(len(neu_sentences)/num_review_sentences*100,2)
+#         neg_percent = round(len(neg_sentences)/num_review_sentences*100,2)
+#         pos_percent = round(len(pos_sentences)/num_review_sentences*100,2)   
+#         neu_percent = round(len(neu_sentences)/num_review_sentences*100,2)
         
-        sorted_neg_sentences = [comment for score, comment in sorted(neg_sentences, key=lambda x: x[0])]
-        sorted_pos_sentences = [comment for score, comment in sorted(pos_sentences, key=lambda x: x[0])]
+#         sorted_neg_sentences = [comment for score, comment in sorted(neg_sentences, key=lambda x: x[0])]
+#         sorted_pos_sentences = [comment for score, comment in sorted(pos_sentences, key=lambda x: x[0])]
         
-        st.write("{}% of all the reviews sentences ({}/{}) on Airbnb for this listing are positive!".format(pos_percent, len(pos_sentences),num_review_sentences))
-        st.write("{}% of them ({}/{}) are negative, and {}% of them ({}/{}) are neutral.".format(neg_percent,len(neg_sentences),num_review_sentences, neu_percent,len(neu_sentences),num_review_sentences))
-        st.write('---------------')
-        st.write("The negative sentences that are helpful for later improvement are as follows:")
-        print(num_review_sentences, len(pos_sentences), len(neg_sentences))
-        for i, sentence in enumerate(sorted_neg_sentences):    
-            st.write("{}: {}".format(i+1, sentence)) # need to yield every 3 items from a list
+#         st.write("{}% of all the reviews sentences ({}/{}) on Airbnb for this listing are positive!".format(pos_percent, len(pos_sentences),num_review_sentences))
+#         st.write("{}% of them ({}/{}) are negative, and {}% of them ({}/{}) are neutral.".format(neg_percent,len(neg_sentences),num_review_sentences, neu_percent,len(neu_sentences),num_review_sentences))
+#         st.write('---------------')
+#         st.write("The negative sentences that are helpful for later improvement are as follows:")
+#         print(num_review_sentences, len(pos_sentences), len(neg_sentences))
+#         for i, sentence in enumerate(sorted_neg_sentences):    
+#             st.write("{}: {}".format(i+1, sentence)) # need to yield every 3 items from a list
 
-    else:
-        st.write('Oops, this listing currently has no comments.')
+#     else:
+#         st.write('Oops, this listing currently has no comments.')
         
-    return sorted_neg_sentences, sorted_pos_sentences
+#     return sorted_neg_sentences, sorted_pos_sentences
 
 
-# check the result
-top_1_recommended_listing = df_recs['listing_id'].values[0]
-# print("{} listing review sentiment report: ".format(top_1_recommended_listing))
-st.write("{} listing review sentiment report: ".format(top_1_recommended_listing))
-st.write('---------------')
-sorted_neg_sentences, sorted_pos_sentences = get_review_sentiment_report(df_model,'comments',top_1_recommended_listing)
+# # check the result
+# top_1_recommended_listing = df_recs['listing_id'].values[0]
+# # print("{} listing review sentiment report: ".format(top_1_recommended_listing))
+# st.write("{} listing review sentiment report: ".format(top_1_recommended_listing))
+# st.write('---------------')
+# sorted_neg_sentences, sorted_pos_sentences = get_review_sentiment_report(df_model,'comments',top_1_recommended_listing)
 
 
 
