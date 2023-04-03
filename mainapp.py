@@ -25,13 +25,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 st.title('AirBnb Rentals in Seattle')
 st.write('Hello from team-spirit :)')
-st.write('v0.02')
-<<<<<<< HEAD
-st.write('hello world from Xinqian again')
-=======
-st.write('hello world from Xinqian')
-st.write('hello world from Kun')
->>>>>>> b0c262028f7bc266379007ca6512190a78cdd150
+
 
 # 1. Prepare data
 
