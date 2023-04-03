@@ -59,8 +59,8 @@ from nltk.corpus import stopwords
 import re
 
 nltk.download('stopwords')
-nltk.download('punkt')
-nltk.download('wordnet')
+# nltk.download('punkt')
+# nltk.download('wordnet')
 
 # get data
 @st.cache_data
