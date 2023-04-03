@@ -1,4 +1,5 @@
 seaborn
 matplotlib
 scikit-learn
+nltk
 
