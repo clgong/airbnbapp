@@ -55,7 +55,12 @@ from nltk import word_tokenize, pos_tag
 from nltk.tokenize import RegexpTokenizer
 from nltk.stem import WordNetLemmatizer,PorterStemmer
 from nltk.corpus import stopwords
+
 import re
+
+nltk.download('stopwords')
+nltk.download('punkt')
+nltk.download('wordnet')
 
 # get data
 @st.cache_data
@@ -69,8 +74,8 @@ def get_data():
     df['comments'].fillna(' ', inplace=True)
 
     # select cols
-    listing_cols = ['listing_id','listing_url','review_scores_rating', 'polarity','comments'] 
-    content_cols = ['listing_name', 'description', 
+    listing_cols = ['listing_id','listing_url','review_scores_rating', 'polarity','comments']
+    content_cols = ['listing_name', 'description',
                     'host_name', 'host_location', 'host_about',
                     'host_response_time', 'host_neighbourhood',
                     'host_verifications', 'neighbourhood_cleansed',
@@ -228,7 +233,7 @@ sentiment_plot = plot_listing_sentiment_over_time(review_df, rec_listing_ids)
 st.write('Review sentiment trends')
 
 
-# plot the figure 
+# plot the figure
 st.altair_chart(sentiment_plot, use_container_width=True)
 
 
@@ -247,14 +252,14 @@ st.altair_chart(sentiment_plot, use_container_width=True)
 
 @st.cache_data
 def make_wordcloud(df, col, listing_id, stop_words, mask=None):
-    
+
     if listing_id in df['listing_id'].values:
         text = df[df['listing_id'] == listing_id][col].values[0]
-        wordcloud = WordCloud(width = 100, 
-                              height = 100, 
-                              stopwords=stop_words, 
-                              scale=10, 
-                              colormap = 'PuRd', 
+        wordcloud = WordCloud(width = 100,
+                              height = 100,
+                              stopwords=stop_words,
+                              scale=10,
+                              colormap = 'PuRd',
                               background_color ='black',
 #                               mask = None,
                             #   max_words=100,
@@ -266,7 +271,7 @@ def make_wordcloud(df, col, listing_id, stop_words, mask=None):
         plt.show()
         st.pyplot(fig)
     else:
-        print('Oops, this listing currently has no comments.') 
+        print('Oops, this listing currently has no comments.')
         st.write('Oops, this listing currently has no comments.')
 
 # # generate wordcloud for a recommended listing (has comments)
@@ -275,7 +280,7 @@ wordcloud_STOPWORDS = STOPWORDS
 # make_wordcloud(df_model,'comments', top_1_recommended_listing, wordcloud_STOPWORDS, mask=None)
 
 ok = st.button("Make Wordcloud for the listing description")
-if ok:   
+if ok:
     with st.spinner('Making Wordcloud...'):
         make_wordcloud(df_rec,'cleaned_content', top_1_recommended_listing, wordcloud_STOPWORDS, mask=None)
         # make_wordcloud(text, stopwords_list, "picture/wine_image.jpg")
