@@ -59,7 +59,7 @@ from nltk.corpus import stopwords
 import re
 
 nltk.download('stopwords')
-# nltk.download('punkt')
+nltk.download('punkt')
 # nltk.download('wordnet')
 
 # get data
