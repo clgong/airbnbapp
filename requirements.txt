@@ -1,4 +1,7 @@
 seaborn
 matplotlib
 scikit-learn
+nltk
+transformers
+wordcloud
 
