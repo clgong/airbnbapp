@@ -1,0 +1,15 @@
+<component name="libraryTable">
+  <library name="cleaned_v2">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/data/cleaned_v2/listing_train.zip!/" />
+      <root url="jar://$PROJECT_DIR$/data/cleaned_v2/cleaned_listing_and_review_with_polarity.zip!/" />
+      <root url="jar://$PROJECT_DIR$/data/cleaned_v2/cleaned_calendar.zip!/" />
+      <root url="jar://$PROJECT_DIR$/data/cleaned_v2/listing_holdout.zip!/" />
+      <root url="jar://$PROJECT_DIR$/data/cleaned_v2/cleaned_review.zip!/" />
+      <root url="jar://$PROJECT_DIR$/data/cleaned_v2/cleaned_review_with_polarity.zip!/" />
+      <root url="jar://$PROJECT_DIR$/data/cleaned_v2/cleaned_listing.zip!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
