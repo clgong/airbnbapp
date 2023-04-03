@@ -6,6 +6,7 @@
 Here's our first attempt at using data to create a table:
 """
 
+
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -22,6 +23,12 @@ RANDOM_STATE= 42
 
 from sklearn.metrics.pairwise import cosine_similarity
 
+
+# set pages
+st.set_page_config(
+    page_title = 'Multippage App',
+    page_icon='👋'
+)
 
 st.title('AirBnb Rentals in Seattle')
 st.write('Hello from team-spirit :)')
