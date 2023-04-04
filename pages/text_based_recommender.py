@@ -25,10 +25,12 @@ st.write('hello world from Xinqian again')
 # header
 st.header('Try the customized recommender in UI')
 
-#make a input box
+#make an input box
 defult_input = "I want a private room close to uw campus with parking and coffee shop."
-input_query = st.text_input('Descripe the rental you like here',defult_input)
+input_query = st.text_input("Please describe the rental you're looking for here ",defult_input)
 submit = st.button('Submit')
+
+
 
 # TODO: run the code below after click the submit button instead of running the code automatically
 ################################################################
@@ -50,17 +52,20 @@ from wordcloud import WordCloud, STOPWORDS
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+
+import re
 import nltk
+nltk.download('stopwords')
+nltk.download('punkt')
+nltk.download('wordnet')
+nltk.download('omw-1.4')
+# nltk.download('averaged_perceptron_tagger')
+
 from nltk import word_tokenize, pos_tag
 from nltk.tokenize import RegexpTokenizer
 from nltk.stem import WordNetLemmatizer,PorterStemmer
 from nltk.corpus import stopwords
 
-import re
-
-nltk.download('stopwords')
-nltk.download('punkt')
-nltk.download('wordnet')
 
 # get data
 @st.cache_data
