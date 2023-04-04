@@ -1,6 +1,3 @@
-
-
-
 """
 # streamlit reference
 Here's our first attempt at using data to create a table:
@@ -81,7 +78,3 @@ if(st.button('SUBSCRIBE')):
 #slider
 sal = st.slider('your salary', 1000, 5000)
 st.write('your salary is ', sal)
-
-
-
-
