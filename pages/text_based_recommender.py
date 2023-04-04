@@ -176,8 +176,10 @@ def get_recommendations(df,similarity, n=5):
     # best cosine distance for each token independantly
     best_index = extract_best_indices(similarity, top_n=n)
 
-    # return the top n similar listing ids and raw comments
-    result_df = df.loc[best_index, ['listing_id', 'listing_url', 'listing_name', 'description',
+    # return the top n similar listings
+    result_df = df.loc[best_index,:]
+    result_df['recommendations'] = ['recommendation_'+ str(i) for i in range(1,len(result_df)+1)]
+    result_df = result_df.loc[:, ['recommendations','listing_id', 'listing_url', 'listing_name', 'description',
                                     'room_type','property_type',
                                  'neighborhood_overview', 'neighbourhood_cleansed', 'neighbourhood_group_cleansed',
                                  'host_about', 'amenities', 'comments', 'review_scores_rating']]
@@ -190,6 +192,10 @@ st.write(recomended_listings)
 
 ################################################################
 ##### add review sentiment plot for the recommended listings #####
+
+#### ISSUES TODO:  the wordcloud code only use the first recomendation as example
+# 1. change the trends legend labels from listing_id to recommendation_n for users!!
+
 
 import altair as alt
 
@@ -232,43 +238,44 @@ st.altair_chart(sentiment_plot, use_container_width=True)
 # ##### add wordcloud for the recommended listings #####
 # #### below only use the first recomendation as example###
 
+#### ISSUES TODO:  the wordcloud code only use the first recomendation as example
+# 1. make a selection box/doropdown for users to choose which recommendation to generate!!
+# 2. how to run the code section one by one istead of starting from begaining when choosing different recommendation listing
 
+# top_n_reco mmended_listing = recomended_listings['recommendations'].values.tolist()
+# option = st.selectbox('select an option',top_n_recommended_listing)
+# st.write('you selected', option)
 
-# # # generate wordcloud for a recommended listing (has comments)
-# # top_1_recommended_listing = recomended_listings['listing_id'].values[0]
-# # wordcloud_STOPWORDS = STOPWORDS
-# # make_wordcloud(df_rec,'cleaned_content', top_1_recommended_listing, wordcloud_STOPWORDS, mask=None)
+@st.cache_data
+def make_wordcloud(df, col, listing_id, stop_words, mask=None):
 
+    if listing_id in df['listing_id'].values:
+        text = df[df['listing_id'] == listing_id][col].values[0]
+        wordcloud = WordCloud(width = 100,
+                              height = 100,
+                              stopwords=stop_words,
+                              scale=10,
+                              colormap = 'PuRd',
+                              background_color ='black',
+#                               mask = None,
+                            #   max_words=100,
+                             ).generate(text)
 
-# @st.cache_data
-# def make_wordcloud(df, col, listing_id, stop_words, mask=None):
+        fig, ax = plt.subplots(figsize=(4,4))
+        ax.imshow(wordcloud, interpolation="bilinear")
+        ax.axis("off")
+        plt.show()
+        st.pyplot(fig)
+    else:
+        print('Oops, this listing currently has no comments.')
+        st.write('Oops, this listing currently has no comments.')
 
-#     if listing_id in df['listing_id'].values:
-#         text = df[df['listing_id'] == listing_id][col].values[0]
-#         wordcloud = WordCloud(width = 100,
-#                               height = 100,
-#                               stopwords=stop_words,
-#                               scale=10,
-#                               colormap = 'PuRd',
-#                               background_color ='black',
-# #                               mask = None,
-#                             #   max_words=100,
-#                              ).generate(text)
+# # generate wordcloud for a recommended listing (has comments)
+top_1_recommended_listing = recomended_listings['listing_id'].values[0]
+wordcloud_STOPWORDS = STOPWORDS
+make_wordcloud(df_rec,'cleaned_content', top_1_recommended_listing, wordcloud_STOPWORDS, mask=None)
 
-#         fig, ax = plt.subplots(figsize=(4,4))
-#         ax.imshow(wordcloud, interpolation="bilinear")
-#         ax.axis("off")
-#         plt.show()
-#         st.pyplot(fig)
-#     else:
-#         print('Oops, this listing currently has no comments.')
-#         st.write('Oops, this listing currently has no comments.')
-
-# # # generate wordcloud for a recommended listing (has comments)
-# top_1_recommended_listing = recomended_listings['listing_id'].values[0]
-# wordcloud_STOPWORDS = STOPWORDS
-# # make_wordcloud(df_model,'comments', top_1_recommended_listing, wordcloud_STOPWORDS, mask=None)
-
+# generate wordcloud using a button
 # ok = st.button("Make Wordcloud for the listing description")
 # if ok:
 #     with st.spinner('Making Wordcloud...'):
