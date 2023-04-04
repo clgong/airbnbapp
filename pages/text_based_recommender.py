@@ -75,7 +75,7 @@ def get_data():
     # select cols
     listing_cols = ['listing_id','listing_url','review_scores_rating', 'polarity','comments'] 
     # get content cols
-    content_cols = ['listing_name', 'description', 
+    content_cols = ['listing_name', 'description',
                     'host_name', 'host_location', 'host_about',
                     'host_response_time', 'host_neighbourhood',
                     'host_verifications', 'neighbourhood_cleansed',
@@ -188,45 +188,43 @@ recomended_listings = get_recommendations(df_rec, similarity, n=5)
 st.write(recomended_listings)
 
 
-# ################################################################
-# ##### add review sentiment plot for the recommended listings #####
+################################################################
+##### add review sentiment plot for the recommended listings #####
 
+import altair as alt
 
-# import altair as alt
-# @st.cache_data
-# def get_review_data():
-#     # directly read the saved cleaned_review_with_polarity dataset
-#     review_df = pd.read_pickle('data/cleaned_v2/cleaned_review_with_polarity.zip')
-#     # print(review_df.shape)
-#     # review_df.head(2)
-#     return review_df
-# review_df = get_review_data()
+@st.cache_data
+def get_review_data():
+    # directly read the saved cleaned_review_with_polarity dataset
+    review_df = pd.read_pickle('data/cleaned_v2/cleaned_review_with_polarity.zip')
+    # print(review_df.shape)
+    # review_df.head(2)
+    return review_df
+review_df = get_review_data()
 
-# # make plot
-# # notice: altair can only take <=5000 rows, so cannot show all listings at once
-# @st.cache_data
-# def plot_listing_sentiment_over_time(df,listing_id = None):
-#     sub_df = df[df['listing_id'].isin(listing_id)]
+# make plot
+# notice: altair can only take <=5000 rows, so cannot show all listings at once
+@st.cache_data
+def plot_listing_sentiment_over_time(df,listing_id = None):
+    sub_df = df[df['listing_id'].isin(listing_id)]
 
-#     plot = alt.Chart(sub_df, width=500).mark_line().encode(
-#                 x='year(date):T',
-#                 y='mean(polarity)',
-#                 color=alt.Color('listing_id:O', scale=alt.Scale(scheme= 'dark2'))
-#             ).interactive()
-#     return plot
+    plot = alt.Chart(sub_df, width=500).mark_line().encode(
+                x='year(date):T',
+                y='mean(polarity)',
+                color=alt.Color('listing_id:O', scale=alt.Scale(scheme= 'dark2'))
+            ).interactive()
+    return plot
 
-# # plot the sentiment changes over time by year for the recommended listings
-# rec_listing_ids = recomended_listings['listing_id'].values
+# plot the sentiment changes over time by year for the recommended listings
+rec_listing_ids = recomended_listings['listing_id'].values
+sentiment_plot = plot_listing_sentiment_over_time(review_df, rec_listing_ids)
+# print(recs_listing_ids)
 
-# sentiment_plot = plot_listing_sentiment_over_time(review_df, rec_listing_ids)
-# # print(recs_listing_ids)
+# write a note
+st.write('Review sentiment trends')
 
-# # write a note
-# st.write('Review sentiment trends')
-
-
-# # plot the figure
-# st.altair_chart(sentiment_plot, use_container_width=True)
+# plot the figure
+st.altair_chart(sentiment_plot, use_container_width=True)
 
 
 
