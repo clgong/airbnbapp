@@ -248,6 +248,7 @@ st.altair_chart(sentiment_plot, use_container_width=True)
 # option = st.selectbox('select an option',top_n_recommended_listing)
 # st.write('you selected', option)
 
+
 @st.cache_data
 def make_wordcloud(df, col, listing_id, stop_words, mask=None):
 
@@ -272,10 +273,26 @@ def make_wordcloud(df, col, listing_id, stop_words, mask=None):
         print('Oops, this listing currently has no comments.')
         st.write('Oops, this listing currently has no comments.')
 
-# # generate wordcloud for a recommended listing (has comments)
-top_1_recommended_listing = recomended_listings['listing_id'].values[0]
+#
+# generate wordcloud for a recommended listing (has comments)
+#
+
+st.subheader('Pick a top n recommendation for more info.')
 wordcloud_STOPWORDS = STOPWORDS
-make_wordcloud(df_rec,'cleaned_content', top_1_recommended_listing, wordcloud_STOPWORDS, mask=None)
+
+# get a top n listing id from the user
+selected_listing_id = st.selectbox("Choose listing id:", recomended_listings['listing_id'])
+index = recomended_listings['listing_id'].tolist().index(selected_listing_id)
+link = recomended_listings.listing_url.tolist()[index]
+
+# Show name and URL of selected property
+st.write("\"{}\" - [{}]({})".format(recomended_listings.listing_name.tolist()[index],link,link))
+
+# Draw the word cloud
+make_wordcloud(df_rec,'cleaned_content', selected_listing_id, wordcloud_STOPWORDS, mask=None)
+
+
+
 
 # generate wordcloud using a button
 # ok = st.button("Make Wordcloud for the listing description")
