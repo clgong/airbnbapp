@@ -22,7 +22,7 @@ pd.set_option('display.max_rows', 100)
 RANDOM_STATE= 42
 
 from sklearn.metrics.pairwise import cosine_similarity
-
+import subprocess
 
 # set pages
 st.set_page_config(
@@ -35,7 +35,7 @@ st.write('Hello from team-spirit :)')
 
 st.write('Streamlit version: '+st.__version__)
 
-st.subheader("AWS debug 0.1")
+st.subheader("AWS debug: 0.2")
 if st.button('Pull from git'):
     subprocess.run("git pull origin", shell=True)
     st.experimental_rerun()
