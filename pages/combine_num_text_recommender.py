@@ -425,8 +425,8 @@ def update_recommend_listing(recomended_list, filtered_std_df, original_df, n):
                                             (listing_id not in filtered_std_df['listing_id'].to_list())]
 
 
-            df_c = pd.DataFrame(get_pca_df(df_std_new.iloc[:,:-3],threshold=0.9)[0], columns=list(df_std_new.iloc[:,:-3].columns)).T
-            new_id = df_std_new.sort_values(df_c.iloc[:,0].sort_values(ascending=False)[:1].index[0],
+            df_d = pd.DataFrame(get_pca_df(df_std_new.iloc[:,:-3],threshold=0.9)[0], columns=list(df_std_new.iloc[:,:-3].columns)).T
+            new_id = df_std_new.sort_values(df_d.iloc[:,0].sort_values(ascending=False)[:1].index[0],
                            ascending=False).head(n-len(listing_id))['listing_id']
 
             updated_list = listing_id + list(new_id)
