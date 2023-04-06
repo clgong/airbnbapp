@@ -27,7 +27,6 @@ from collections import Counter
 from wordcloud import WordCloud, STOPWORDS
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 
-import umap
 from sklearn.preprocessing import OneHotEncoder, OrdinalEncoder, StandardScaler
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.metrics import silhouette_score
