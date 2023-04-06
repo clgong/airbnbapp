@@ -67,7 +67,7 @@ st.header('Try the customized recommender in UI')
 
 #make a price query slider
 price_range = st.slider("Please choose your preferred price range",
-                        value = [50,10000])
+                        value = [50,5000])
 st.write("Your preferred price range:", price_range)
 
 
@@ -282,10 +282,6 @@ listing_df = listing_df.reset_index()
 listing_trans['listing_id'] = listing_df['listing_id']
 listing_trans['cluster'] = listing_df['cluster']
 
-df_filter = listing_df.loc[(listing_df['price'] < price_range[1]) &(listing_df['price'] > price_range[1] )]
-df_filter_std = listing_trans.loc[listing_trans['listing_id'].isin(df_filter['listing_id'])]
-df_filter = df_filter.reset_index()
-
 numeric_features = ['host_response_rate', 'host_acceptance_rate', 'host_is_superhost',
                      'host_has_profile_pic', 'host_identity_verified', 'has_license',
                      'instant_bookable','accommodates','bedrooms', 'beds',
@@ -300,9 +296,13 @@ numeric_features = ['host_response_rate', 'host_acceptance_rate', 'host_is_super
                      'calculated_host_listings_count_private_rooms',
                      'calculated_host_listings_count_shared_rooms', 'reviews_per_month',
                      'host_operate_years', 'polarity','cluster']
-
-num_similarity = cosine_similarity(df_filter[numeric_features].fillna(0))
+similarity_df = listing_df[numeric_features].fillna(0)
+num_similarity = cosine_similarity(similarity_df)
 df_filter.insert(loc=1,column='similarity',value=num_similarity[0])
+
+df_filter = listing_df.loc[(listing_df['price'] < price_range[1]) &(listing_df['price'] > price_range[1] )]
+df_filter_std = listing_trans.loc[listing_trans['listing_id'].isin(df_filter['listing_id'])]
+df_filter = df_filter.reset_index()
 
 
 ##### preprocess input query
