@@ -94,7 +94,7 @@ def get_data():
     # get date cols
     date_col = df.select_dtypes('datetime64[ns]').columns.to_list()
     # remove the following cols
-    removed_cols = ['host_id',
+    removed_col = ['host_id',
                     'host_listings_count',
                     'host_total_listings_count',
                     'latitude',
