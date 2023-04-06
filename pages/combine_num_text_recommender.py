@@ -298,7 +298,7 @@ numeric_features = ['host_response_rate', 'host_acceptance_rate', 'host_is_super
                      'host_operate_years', 'polarity','cluster']
 similarity_df = listing_df[numeric_features].fillna(0)
 num_similarity = cosine_similarity(similarity_df)
-df_filter.insert(loc=1,column='similarity',value=num_similarity[0])
+listing_df.insert(loc=1,column='similarity',value=num_similarity[0])
 
 df_filter = listing_df.loc[(listing_df['price'] < price_range[1]) &(listing_df['price'] > price_range[1] )]
 df_filter_std = listing_trans.loc[listing_trans['listing_id'].isin(df_filter['listing_id'])]
