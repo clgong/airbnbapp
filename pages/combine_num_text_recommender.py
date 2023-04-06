@@ -278,7 +278,6 @@ new_col = ['listing_url', 'listing_name',
            'description','neighborhood_overview',
            'host_about', 'amenities', 'comments','cleaned_content','content']
 listing_df[new_col] = raw_df[new_col].values
-listing_df = listing_df.reset_index()
 listing_trans['listing_id'] = listing_df['listing_id']
 listing_trans['cluster'] = listing_df['cluster']
 
@@ -300,7 +299,7 @@ similarity_df = listing_df[numeric_features].fillna(0)
 num_similarity = cosine_similarity(similarity_df)
 listing_df.insert(loc=1,column='similarity',value=num_similarity[0])
 
-df_filter = listing_df.loc[(listing_df['price'] < price_range[1]) &(listing_df['price'] > price_range[1] )]
+df_filter = listing_df.loc[(listing_df['price'] < price_range[1]) &(listing_df['price'] > price_range[0] )]
 df_filter_std = listing_trans.loc[listing_trans['listing_id'].isin(df_filter['listing_id'])]
 df_filter = df_filter.reset_index()
 
@@ -345,7 +344,7 @@ def vectorize_data(corpus):
     return tfidf_vectorizer, tfidf_matrix
 
 # get corpus
-corpus = df_filter['content'].values
+corpus = df_filter['cleaned_content'].values
 tfidf_vectorizer, tfidf_matrix = vectorize_data(corpus)
 # st.write(tfidf_matrix.shape)
 
