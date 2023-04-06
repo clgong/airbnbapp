@@ -16,7 +16,6 @@ import seaborn as sns
 from scipy import sparse
 from scipy.stats import kurtosis, skew
 import altair as alt
-from mycolorpy import colorlist as mcp
 import matplotlib.pyplot as plt
 
 import warnings
