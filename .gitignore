@@ -2,3 +2,7 @@
 final_proj_env/
 vtest1/
 .DS_Store
+
+
+# security
+*.pem
