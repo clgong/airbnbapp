@@ -345,7 +345,7 @@ def vectorize_data(corpus):
     return tfidf_vectorizer, tfidf_matrix
 
 # get corpus
-corpus = df_filter['cleaned_content'].values
+corpus = df_filter['content'].values
 tfidf_vectorizer, tfidf_matrix = vectorize_data(corpus)
 # st.write(tfidf_matrix.shape)
 
