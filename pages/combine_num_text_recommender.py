@@ -18,7 +18,6 @@ from scipy.stats import kurtosis, skew
 import altair as alt
 from mycolorpy import colorlist as mcp
 import matplotlib.pyplot as plt
-%matplotlib inline
 
 import warnings
 warnings.filterwarnings('ignore',category=DeprecationWarning)
