@@ -111,7 +111,7 @@ def get_data():
                     'availability_365',
                     'number_of_reviews_ltm',
                     'number_of_reviews_l30d',
-                    'host_response_time_encoded'] + data_col + ['description',
+                    'host_response_time_encoded'] + date_col + ['description',
                                                                 'neighborhood_overview',
                                                                 'picture_url',
                                                                 'host_url',
