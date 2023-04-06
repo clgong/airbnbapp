@@ -35,6 +35,10 @@ st.write('Hello from team-spirit :)')
 
 st.write('Streamlit version: '+st.__version__)
 
+st.subheader("AWS debug 0.1")
+if st.button('Pull from git'):
+    subprocess.run("git pull origin", shell=True)
+    st.experimental_rerun()
 
 # 1. Prepare data
 
