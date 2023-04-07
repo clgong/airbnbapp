@@ -14,6 +14,7 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 
+
 import warnings
 warnings.filterwarnings('ignore',category=DeprecationWarning)
 
@@ -36,6 +37,7 @@ st.write('Hello from team-spirit :)')
 
 st.write('DEBUG, branch from xinqian_branch_2 to cliff_awsdebug_2 v0.3')
 
+import subprocess
 if st.button('Pull from git'):
     subprocess.run("git pull origin", shell=True)
     st.experimental_rerun()
