@@ -191,7 +191,7 @@ def get_recommendations(df,similarity, n=5):
 recomended_listings = get_recommendations(df_rec, similarity, n=5)
 st.write(recomended_listings)
 
-
+'''
 ################################################################
 ##### add review sentiment plot for the recommended listings #####
 
@@ -291,7 +291,7 @@ st.write("\"{}\" - [{}]({})".format(recomended_listings.listing_name.tolist()[in
 # Draw the word cloud
 make_wordcloud(df_rec,'cleaned_content', selected_listing_id, wordcloud_STOPWORDS, mask=None)
 
-
+'''
 
 # see if this fixes memory issues
 corpus = None
@@ -311,3 +311,7 @@ tfidf_matrix = None
 # # issue
 # # the wordcould showed fewer words in streamlit than in the deepnote recommender_system_text_content_based
 # st.write(len(df_rec[df_rec['listing_id'] == top_1_recommended_listing]['cleaned_content'].values[0].split()))
+
+
+
+
