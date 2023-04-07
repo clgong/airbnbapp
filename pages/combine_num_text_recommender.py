@@ -336,7 +336,7 @@ def vectorize_data(corpus):
                                     ngram_range = (1,2),
                                     stop_words='english')
     # update: use todense() and np.asarray to avoid error in streamlit app
-    tfidf_matrix = tfidf_vectorizer.fit_transform(corpus).todense()
+    tfidf_matrix = tfidf_vectorizer.fit_transform(corpus)
     tfidf_matrix = np.asarray(tfidf_matrix)
 
     return tfidf_vectorizer, tfidf_matrix
