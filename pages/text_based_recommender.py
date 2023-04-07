@@ -2,10 +2,10 @@
 
 
 """
- UPDATE Apr 6: (use the finalized dataset cleaned_listing_finalized_for_streamlit)
- 1. reomoved picke lib, use pandas to load the piclked file
- 2. added price column
- 3. edited some words
+ UPDATE Apr 6: (add/delete dataset)
+ 1.use the finalized dataset cleaned_listing_finalized_for_streamlit
+ 2.removed picke lib, use pandas to load the pickled file
+ 3. added price column and edited some words
 
 """
 

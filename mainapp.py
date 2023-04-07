@@ -2,8 +2,9 @@
 
 
 """
-# My first app
-Here's our first attempt at using data to create a table:
+ UPDATE Apr 6: (changed the dataset)
+ 1.use the finalized dataset cleaned_listing_finalized_for_streamlit.zip file
+  instead of the cleaned_listing_and_review_with_polarity.zip file
 """
 
 
@@ -37,7 +38,7 @@ st.write('Hello from team-spirit :)')
 # 1. Prepare data
 
 # load dataset that has already been cleaned
-raw_df = pd.read_pickle('./data/cleaned_v2/cleaned_listing_and_review_with_polarity.zip')
+raw_df = pd.read_pickle('./data/cleaned_v2/cleaned_listing_finalized_for_streamlit.zip')
 
 # Note this will print to the terminal
 #print(raw_df.shape)
