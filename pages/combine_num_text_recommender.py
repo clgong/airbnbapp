@@ -392,7 +392,7 @@ def get_recommendations(df,similarity, n=5):
     # return the top n similar listings
     result_df = df.loc[best_index,:]
     result_df['recommendations'] = ['recommendation_'+ str(i) for i in range(1,len(result_df)+1)]
-    result_df = result_df.loc[:, ['recommendations','cluster', 
+    result_df = result_df.loc[:, ['recommendations','cluster',
                                   'similarity', 'price',
                                   'listing_id',
                                   'listing_url',
@@ -418,22 +418,19 @@ def update_recommend_listing(recomended_list, filtered_std_df, original_df, n):
         if len(recomended_list['cluster'].mode()) >= 1:
             cluster_label = recomended_list['cluster'].mode().iloc[0]
             listing_id = list(recomended_list.loc[recomended_list['cluster']==cluster_label]['listing_id'])
-
-            df_std_new = filtered_std_df.loc[(filtered_std_df['cluster']==cluster_label)&\
-                                            (listing_id not in filtered_std_df['listing_id'].to_list())]
-
-
-            df_d = pd.DataFrame(get_pca_df(df_std_new.iloc[:,:-3],threshold=0.9)[0], columns=list(df_std_new.iloc[:,:-3].columns)).T
-            new_id = df_std_new.sort_values(df_d.iloc[:,0].sort_values(ascending=False)[:1].index[0],
+            if len(filtered_std_df) >= n:
+                df_std_new = filtered_std_df.loc[(filtered_std_df['cluster']==cluster_label)&(listing_id not in filtered_std_df['listing_id'].to_list())]
+                df_d = pd.DataFrame(get_pca_df(df_std_new.iloc[:,:-3],threshold=0.9)[0], columns=list(df_std_new.iloc[:,:-3].columns)).T
+                new_id = df_std_new.sort_values(df_d.iloc[:,0].sort_values(ascending=False)[:1].index[0],
                            ascending=False).head(n-len(listing_id))['listing_id']
 
-            updated_list = listing_id + list(new_id)
+                updated_list = listing_id + list(new_id)
 
-            df_recommend = original_df.loc[original_df['listing_id']\
+                df_recommend = original_df.loc[original_df['listing_id']\
                                            .isin(updated_list)]
-            df_recommend = df_recommend.sort_values('similarity',ascending=False)
-            df_recommend['recommendations'] = ['recommendation_'+ str(i) for i in range(1,len(df_recommend)+1)]
-            df_recommend.columns = ['recommendations', 'cluster',
+                df_recommend = df_recommend.sort_values('similarity',ascending=False)
+                df_recommend['recommendations'] = ['recommendation_'+ str(i) for i in range(1,len(df_recommend)+1)]
+                df_recommend.columns = ['recommendations', 'cluster',
                                                        'similarity',
                                                        'price',
                                                        'listing_id',
@@ -449,6 +446,27 @@ def update_recommend_listing(recomended_list, filtered_std_df, original_df, n):
                                                        'amenities',
                                                        'comments',
                                                        'review_scores_rating']]
+            else:
+                df_recommend = original_df.loc[(original_df['cluster']==cluster_label)
+                df_recommend = df_recommend.sort_values('similarity',ascending=False)
+                df_recommend['recommendations'] = ['recommendation_'+ str(i) for i in range(1,len(df_recommend)+1)]
+                df_recommend.columns = ['recommendations', 'cluster',
+                                                                       'similarity',
+                                                                       'price',
+                                                                       'listing_id',
+                                                                       'listing_url',
+                                                                       'listing_name',
+                                                                       'description',
+                                                                       'room_type',
+                                                                       'property_type',
+                                                                       'neighborhood_overview',
+                                                                       'neighbourhood_cleansed',
+                                                                       'neighbourhood_group_cleansed',
+                                                                       'host_about',
+                                                                       'amenities',
+                                                                       'comments',
+                                                                       'review_scores_rating']]
+
     if len(recomended_list['cluster'].value_counts()) == 1:
         df_recommend = recomended_list
 
@@ -456,7 +474,7 @@ def update_recommend_listing(recomended_list, filtered_std_df, original_df, n):
     return df_recommend
 
 # Try the combined recommender system
-recomended_listings_update = update_recommend_listing(recomended_listings, df_filter_std, listing_df, n=5)
+recomended_listings_update = update_recommend_listing(recomended_listings, df_filter_std, df_filter, n=5)
 st.write(recomended_listings_update)
 
 
