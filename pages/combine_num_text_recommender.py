@@ -69,6 +69,7 @@ st.header('Try the customized recommender in UI')
 price_range = st.slider("Please choose your preferred price range",
                         value = [50,5000])
 st.write("Your preferred price range:", price_range)
+submit_price = st.button('Submit')
 
 
 #make an input box
@@ -209,28 +210,24 @@ listing_trans = get_transformed_data(listing_df)
 ##### get the cluster
 @st.cache_data
 # initialize and compute PCA
-def get_pca_df(dataframe, threshold):
+def pca_component(dataframe):
     pca = PCA()
     pca.fit_transform(dataframe)
 
-    # get pca components
     components = pca.components_
 
-    # PCA factor loadings
-    df_c = pd.DataFrame(components, columns=list(dataframe.columns)).T
+    return components
 
-    component_n = []
-    for i in range(len(df_c)):
-        if df_c.iloc[:,0].sort_values(ascending=False)[:i].sum() > threshold:
-            component_n.append(i)
+# PCA factor loadings
+df_c = pd.DataFrame(pca_component(listing_trans), columns=list(listing_trans.columns)).T
 
-    principle_component_lst = list(df_c.iloc[:,0].sort_values(ascending=False)[:component_n[0]].index)
+component_n = []
+for i in range(len(df_c)):
+    if df_c.iloc[:,0].sort_values(ascending=False)[:i].sum() > 0.9:
+        component_n.append(i)
+principle_component_lst = list(df_c.iloc[:,0].sort_values(ascending=False)[:component_n[0]].index)
 
-    df_pca = dataframe[principle_component_lst]
-
-    return components, df_pca
-
-pca_df = get_pca_df(listing_trans, threshold=0.9)[1]
+pca_df = listing_trans[principle_component_lst]
 
 
 @st.cache_data
@@ -299,7 +296,7 @@ similarity_df = listing_df[numeric_features].fillna(0)
 num_similarity = cosine_similarity(similarity_df)
 listing_df.insert(loc=1,column='similarity',value=num_similarity[0])
 
-df_filter = listing_df.loc[(listing_df['price'] < price_range[1]) &(listing_df['price'] > price_range[0] )]
+df_filter = listing_df.loc[(listing_df['price'] < price_range[1]) &(listing_df['price'] > price_range[0])]
 df_filter_std = listing_trans.loc[listing_trans['listing_id'].isin(df_filter['listing_id'])]
 df_filter = df_filter.reset_index()
 
@@ -337,7 +334,6 @@ def vectorize_data(corpus):
                                     stop_words='english')
     # update: use todense() and np.asarray to avoid error in streamlit app
     tfidf_matrix = tfidf_vectorizer.fit_transform(corpus)
-    tfidf_matrix = np.asarray(tfidf_matrix)
 
     return tfidf_vectorizer, tfidf_matrix
 
@@ -348,67 +344,68 @@ tfidf_vectorizer, tfidf_matrix = vectorize_data(corpus)
 
 ##### get similarity
 @st.cache_data
-def get_similarity(input_query, tfidf_matrix):
-    # embed input query
-    tokens = preprocess_text(input_query,stopwords = nltk_STOPWORDS, stem=False, lemma=True).split()
-    query_vector = tfidf_vectorizer.transform(tokens)
-    # get similarity
-    # update: speed the similarity calculation
-    tfidf_matrix_sparse = sparse.csr_matrix(tfidf_matrix)
-    similarity = cosine_similarity(query_vector, tfidf_matrix_sparse)
-
-    return similarity
+def extract_best_indices(similarity, top_n, mask=None):
+    """
+    Use sum of the cosine distance over all tokens and return best mathes.
+    m (np.array): cos matrix of shape (nb_in_tokens, nb_dict_tokens)
+    topk (int): number of indices to return (from high to lowest in order)
+    """
+    # return the sum on all tokens of consine for the input query
+    if len(similarity.shape) > 1:
+        cos_sim = np.mean(similarity, axis=0)
+    else:
+        cos_sim = similarity
+    index = np.argsort(cos_sim)[::-1]
+    if mask is not None:
+        assert mask.shape == m.shape
+        mask = mask[index]
+    else:
+        mask = np.ones(len(cos_sim))
+    mask = np.logical_or(cos_sim[index] != 0, mask) #eliminate 0 cosine distance
+    best_index = index[mask][:top_n]
+    return best_index
 
 similarity = get_similarity(input_query, tfidf_matrix)
 # st.write(similarity.shape)
 
 ##### get recommendations
 @st.cache_data
-def get_recommendations(df,similarity, n=5):
+def get_recommendations(df, input_query, tfidf_matrix, n=5):
 
-    def extract_best_indices(similarity, top_n, mask=None):
-        """
-        Use sum of the cosine distance over all tokens ans return best mathes.
-        m (np.array): cos matrix of shape (nb_in_tokens, nb_dict_tokens)
-        topk (int): number of indices to return (from high to lowest in order)
-        """
-        # return the sum on all tokens of consine for the input query
-        if len(similarity.shape) > 1:
-            cos_sim = np.mean(similarity, axis=0)
-        else:
-            cos_sim = similarity
-        index = np.argsort(cos_sim)[::-1]
+    # embed input query
+    tokens = preprocess_text(input_query,stopwords = nltk_STOPWORDS, stem=False, lemma=True).split()
+    query_vector = tfidf_vectorizer.transform(tokens)
 
-        mask = np.ones(len(cos_sim))
-        mask = np.logical_or(cos_sim[index] != 0, mask) #eliminate 0 cosine distance
-        best_index = index[mask][:top_n]
-        return best_index
+    # get similarity
+    similarity = cosine_similarity(query_vector, tfidf_matrix)
 
     # best cosine distance for each token independantly
     best_index = extract_best_indices(similarity, top_n=n)
 
-    # return the top n similar listings
+    # return the top n similar listing ids and raw comments
     result_df = df.loc[best_index,:]
     result_df['recommendations'] = ['recommendation_'+ str(i) for i in range(1,len(result_df)+1)]
     result_df = result_df.loc[:, ['recommendations','cluster',
-                                  'similarity', 'price',
-                                  'listing_id',
-                                  'listing_url',
-                                  'listing_name',
-                                  'description',
-                                  'room_type',
-                                  'property_type',
-                                  'neighborhood_overview',
-                                  'neighbourhood_cleansed',
-                                  'neighbourhood_group_cleansed',
-                                  'host_about',
-                                  'amenities',
-                                  'comments',
-                                  'review_scores_rating']].sort_values('similarity',ascending=False)
+                                      'similarity', 'price',
+                                      'listing_id',
+                                      'listing_url',
+                                      'listing_name',
+                                      'description',
+                                      'room_type',
+                                      'property_type',
+                                      'neighborhood_overview',
+                                      'neighbourhood_cleansed',
+                                      'neighbourhood_group_cleansed',
+                                      'host_about',
+                                      'amenities',
+                                      'comments',
+                                      'review_scores_rating']].sort_values('similarity',ascending=False)
+
     return result_df
 
+
 # Try the recommender system
-recomended_listings = get_recommendations(df_filter, similarity, n=5)
+recomended_listings = get_recommendations(df_filter, input_query, tfidf_matrix, n=5)
 
 def update_recommend_listing(recomended_list, filtered_std_df, original_df, n):
 
