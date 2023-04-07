@@ -339,7 +339,7 @@ def vectorize_data(corpus):
 
 # get corpus
 corpus = df_filter['cleaned_content'].values
-tfidf_vectorizer, tfidf_matrix = vectorize_data(corpus)
+tfidf_vectorizer, tmatrix = vectorize_data(corpus)
 # st.write(tfidf_matrix.shape)
 
 ##### get similarity
@@ -368,7 +368,7 @@ def extract_best_indices(similarity, top_n, mask=None):
 
 ##### get recommendations
 @st.cache_data
-def get_recommendations(df, input_query, tfidf_matrix, n=5):
+def get_recommendations(df, input_query, _tfidf_matrix, n=5):
 
     # embed input query
     tokens = preprocess_text(input_query,stopwords = nltk_STOPWORDS, stem=False, lemma=True).split()
@@ -403,7 +403,7 @@ def get_recommendations(df, input_query, tfidf_matrix, n=5):
 
 
 # Try the recommender system
-recomended_listings = get_recommendations(df_filter, input_query, tfidf_matrix, n=5)
+recomended_listings = get_recommendations(df_filter, input_query, tmatrix, n=5)
 
 def update_recommend_listing(recomended_list, filtered_std_df, original_df, n):
 
