@@ -125,35 +125,36 @@ def preprocess_text(text, stopwords = nltk_STOPWORDS, stem=False, lemma=False):
     return text
 
 ##### Vectorize data
-@st.cache_data
-def vectorize_data(corpus):
-    # load tfidf vectorizer and do the transformation
-    tfidf_vectorizer = pd.read_pickle(("data/cleaned_v2/tfidf_vectorizer.pk"))
-    tfidf_matrix = tfidf_vectorizer.transform(corpus).todense()
-    tfidf_matrix = np.asarray(tfidf_matrix)
-
-    return tfidf_vectorizer, tfidf_matrix
-
-###### Vectorize data
 #@st.cache_data
 #def vectorize_data(corpus):
 #    # load tfidf vectorizer and do the transformation
 #    tfidf_vectorizer = pd.read_pickle(("data/cleaned_v2/tfidf_vectorizer.pk"))
-#    tfidf_matrix = pd.read_pickle(("data/cleaned_v2/tfidf_matrix.pk"))
-#    # tfidf_matrix = tfidf_vectorizer.transform(corpus).todense()
+#    tfidf_matrix = tfidf_vectorizer.transform(corpus).todense()
 #    tfidf_matrix = np.asarray(tfidf_matrix)
 #
 #    return tfidf_vectorizer, tfidf_matrix
+
+###### Vectorize data
+@st.cache_data
+def vectorize_data():
+    # load tfidf vectorizer and do the transformation
+    tfidf_vectorizer = pd.read_pickle(("data/cleaned_v2/tfidf_vectorizer.pk"))
+    tfidf_matrix = pd.read_pickle(("data/cleaned_v2/tfidf_matrix.pk"))
+    # tfidf_matrix = tfidf_vectorizer.transform(corpus).todense()
+    tfidf_matrix = np.asarray(tfidf_matrix)
+
+    return tfidf_vectorizer, tfidf_matrix
 
 
 
 # get corpus
 corpus = df_rec['content'].values
-tfidf_vectorizer, tfidf_matrix = vectorize_data(corpus)
+#tfidf_vectorizer, tfidf_matrix = vectorize_data(corpus)
+tfidf_vectorizer, tfidf_matrix = vectorize_data()
 
-import pickle
-with open('data/cleaned_v2/tfidf_matrix.pk','wb') as file:
-    pickle.dump(tfidf_matrix,file)
+#import pickle
+#with open('data/cleaned_v2/tfidf_matrix.pk','wb') as file:
+#    pickle.dump(tfidf_matrix,file)
 
 # st.write(tfidf_matrix.shape)
 
