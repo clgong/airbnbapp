@@ -34,6 +34,8 @@ st.set_page_config(
 st.title('AirBnb Rentals in Seattle')
 st.write('Hello from team-spirit :)')
 
-st.write('DEBUG, branch from xinqian_branch_2 to cliff_awsdebug_2 v0.2')
+st.write('DEBUG, branch from xinqian_branch_2 to cliff_awsdebug_2 v0.3')
 
-
+if st.button('Pull from git'):
+    subprocess.run("git pull origin", shell=True)
+    st.experimental_rerun()
