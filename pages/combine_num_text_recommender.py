@@ -392,8 +392,8 @@ def get_recommendations(df,similarity, n=5):
     # return the top n similar listings
     result_df = df.loc[best_index,:]
     result_df['recommendations'] = ['recommendation_'+ str(i) for i in range(1,len(result_df)+1)]
-    result_df = result_df.loc[:, ['recommendations','cluster',
-                                  'similarity',
+    result_df = result_df.loc[:, ['recommendations','cluster', 
+                                  'similarity', 'price',
                                   'listing_id',
                                   'listing_url',
                                   'listing_name',
@@ -414,8 +414,6 @@ recomended_listings = get_recommendations(df_filter, similarity, n=5)
 
 def update_recommend_listing(recomended_list, filtered_std_df, original_df, n):
 
-    df = filtered_std_df.loc[filtered_std_df['listing_id'].isin(recomended_list['listing_id'])]\
-    [['listing_id','cluster']]
     if len(recomended_list['cluster'].value_counts()) > 1:
         if len(recomended_list['cluster'].mode()) >= 1:
             cluster_label = recomended_list['cluster'].mode().iloc[0]
@@ -432,24 +430,25 @@ def update_recommend_listing(recomended_list, filtered_std_df, original_df, n):
             updated_list = listing_id + list(new_id)
 
             df_recommend = original_df.loc[original_df['listing_id']\
-                                           .isin(updated_list)][['cluster',
-                                                                  'similarity',
-                                                                  'price',
-                                                                  'listing_id',
-                                                                  'listing_url',
-                                                                  'listing_name',
-                                                                  'description',
-                                                                  'room_type',
-                                                                  'property_type',
-                                                                  'neighborhood_overview',
-                                                                  'neighbourhood_cleansed',
-                                                                  'neighbourhood_group_cleansed',
-                                                                  'host_about',
-                                                                  'amenities',
-                                                                  'comments',
-                                                                  'review_scores_rating']]
+                                           .isin(updated_list)]
             df_recommend = df_recommend.sort_values('similarity',ascending=False)
             df_recommend['recommendations'] = ['recommendation_'+ str(i) for i in range(1,len(df_recommend)+1)]
+            df_recommend.columns = ['recommendations', 'cluster',
+                                                       'similarity',
+                                                       'price',
+                                                       'listing_id',
+                                                       'listing_url',
+                                                       'listing_name',
+                                                       'description',
+                                                       'room_type',
+                                                       'property_type',
+                                                       'neighborhood_overview',
+                                                       'neighbourhood_cleansed',
+                                                       'neighbourhood_group_cleansed',
+                                                       'host_about',
+                                                       'amenities',
+                                                       'comments',
+                                                       'review_scores_rating']]
     if len(recomended_list['cluster'].value_counts()) == 1:
         df_recommend = recomended_list
 
