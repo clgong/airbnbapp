@@ -41,6 +41,7 @@ if st.button('Pull from git'):
     subprocess.run("git pull origin", shell=True)
     st.experimental_rerun()
 
+'''
 # 1. Prepare data
 
 # load dataset that has already been cleaned
@@ -211,3 +212,4 @@ st.write(df_recs.style.format({"similarity": "{:0.10f}"}))
 # with pd.option_context('display.float_format', '{:0.10f}'.format):
 #     display(df_recs)
 
+'''

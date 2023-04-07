@@ -29,11 +29,11 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 import re
 import nltk
-nltk.download('stopwords')
-nltk.download('punkt')
-nltk.download('wordnet')
-nltk.download('omw-1.4')
-nltk.download('averaged_perceptron_tagger')
+#nltk.download('stopwords')
+#nltk.download('punkt')
+#nltk.download('wordnet')
+#nltk.download('omw-1.4')
+#nltk.download('averaged_perceptron_tagger')
 
 from nltk import word_tokenize, pos_tag
 from nltk.tokenize import RegexpTokenizer
@@ -70,7 +70,7 @@ nltk_STOPWORDS = set(stopwords.words("english"))
 nltk_STOPWORDS.update(added_stopwords)
 
 ##### get data
-@st.cache_data
+#@st.cache_data
 def get_data():
     # directly load the saved dataset
     df = pd.read_pickle('data/cleaned_v2/cleaned_listing_and_review_with_polarity_and_text_content.zip')
@@ -94,7 +94,7 @@ df_rec = get_data()
 # st.write(df_rec.head(2))
 
 ##### preprocess input query
-@st.cache_data
+#@st.cache_data
 def preprocess_text(text, stopwords = nltk_STOPWORDS, stem=False, lemma=False):
     # clean the text
     text = text.lower()
@@ -138,7 +138,7 @@ tfidf_vectorizer, tfidf_matrix = vectorize_data(corpus)
 # st.write(tfidf_matrix.shape)
 
 ##### get similarity
-@st.cache_data
+#@st.cache_data
 def get_similarity(input_query, tfidf_matrix):
     # embed input query
     tokens = preprocess_text(input_query,stopwords = nltk_STOPWORDS, stem=False, lemma=True).split()
@@ -154,7 +154,7 @@ similarity = get_similarity(input_query, tfidf_matrix)
 # st.write(similarity.shape)
 
 ##### get recommendations
-@st.cache_data
+#@st.cache_data
 def get_recommendations(df,similarity, n=5):
 
     def extract_best_indices(similarity, top_n, mask=None):
@@ -201,7 +201,7 @@ st.write(recomended_listings)
 
 import altair as alt
 
-@st.cache_data
+#@st.cache_data
 def get_review_data():
     # directly read the saved cleaned_review_with_polarity dataset
     review_df = pd.read_pickle('data/cleaned_v2/cleaned_review_with_polarity.zip')
@@ -212,7 +212,7 @@ review_df = get_review_data()
 
 # make plot
 # notice: altair can only take <=5000 rows, so cannot show all listings at once
-@st.cache_data
+#@st.cache_data
 def plot_listing_sentiment_over_time(df,listing_id = None):
     sub_df = df[df['listing_id'].isin(listing_id)]
 
@@ -249,7 +249,7 @@ st.altair_chart(sentiment_plot, use_container_width=True)
 # st.write('you selected', option)
 
 
-@st.cache_data
+#@st.cache_data
 def make_wordcloud(df, col, listing_id, stop_words, mask=None):
 
     if listing_id in df['listing_id'].values:
