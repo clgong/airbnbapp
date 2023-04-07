@@ -474,7 +474,7 @@ def update_recommend_listing(recomended_list, filtered_std_df, original_df, n):
     return df_recommend
 
 # Try the combined recommender system
-recomended_listings_update = update_recommend_listing(recomended_listings, df_filter_std, df_filter, n=5)
+recomended_listings_update = update_recommend_listing(recomended_listings, df_filter_std, listing_df, n=5)
 st.write(recomended_listings_update)
 
 
