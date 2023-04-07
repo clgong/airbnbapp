@@ -434,6 +434,7 @@ def update_recommend_listing(recomended_list, filtered_std_df, original_df, n):
             df_recommend = original_df.loc[original_df['listing_id']\
                                            .isin(updated_list)][['cluster',
                                                                   'similarity',
+                                                                  'price',
                                                                   'listing_id',
                                                                   'listing_url',
                                                                   'listing_name',
