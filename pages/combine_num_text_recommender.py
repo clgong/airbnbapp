@@ -69,7 +69,7 @@ st.header('Try the customized recommender in UI')
 price_range = st.slider("Please choose your preferred price range",
                         value = [50,5000])
 st.write("Your preferred price range:", price_range)
-submit_price = st.button('Submit')
+submit_price = st.button('Confirm')
 
 
 #make an input box
