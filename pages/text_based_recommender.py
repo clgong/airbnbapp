@@ -293,6 +293,11 @@ make_wordcloud(df_rec,'cleaned_content', selected_listing_id, wordcloud_STOPWORD
 
 
 
+# see if this fixes memory issues
+corpus = None
+tfidf_vectorizer = None
+tfidf_matrix = None
+
 
 # generate wordcloud using a button
 # ok = st.button("Make Wordcloud for the listing description")
