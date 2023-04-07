@@ -365,8 +365,6 @@ def extract_best_indices(similarity, top_n, mask=None):
     best_index = index[mask][:top_n]
     return best_index
 
-similarity = get_similarity(input_query, tfidf_matrix)
-# st.write(similarity.shape)
 
 ##### get recommendations
 @st.cache_data
