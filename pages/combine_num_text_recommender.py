@@ -445,7 +445,7 @@ def update_recommend_listing(recomended_list, filtered_std_df, original_df, n):
                                                        'host_about',
                                                        'amenities',
                                                        'comments',
-                                                       'review_scores_rating']]
+                                                       'review_scores_rating']
             else:
                 df_recommend = original_df.loc[(original_df['cluster']==cluster_label)
                 df_recommend = df_recommend.sort_values('similarity',ascending=False)
@@ -465,7 +465,7 @@ def update_recommend_listing(recomended_list, filtered_std_df, original_df, n):
                                                                        'host_about',
                                                                        'amenities',
                                                                        'comments',
-                                                                       'review_scores_rating']]
+                                                                       'review_scores_rating']
 
     if len(recomended_list['cluster'].value_counts()) == 1:
         df_recommend = recomended_list
