@@ -195,163 +195,163 @@ recomended_listings = get_recommendations(df_rec, similarity, n=5)
 st.header('Top 5 recommended rentals')
 st.write(recomended_listings)
 
-
+#
+#################################################################
+###### add review sentiment plot for the recommended listings #####
+#
+##### ISSUES TODO:  the wordcloud code only use the first recomendation as example
+## 1. change the trends legend labels from listing_id to recommendation_n for users!!
+#
+#
+#@st.cache_data
+#def get_review_data():
+#    # directly read the saved cleaned_review_with_polarity dataset
+#    review_df = pd.read_pickle('data/cleaned_v2/cleaned_review_with_polarity.zip')
+#    # print(review_df.shape)
+#    # review_df.head(2)
+#    return review_df
+#review_df = get_review_data()
+#
+## make plot
+## notice: altair can only take <=5000 rows, so cannot show all listings at once
+#@st.cache_data
+#def plot_listing_sentiment_over_time(df,listing_id = None):
+#    sub_df = df[df['listing_id'].isin(listing_id)]
+#
+#    plot = alt.Chart(sub_df, width=500).mark_line().encode(
+#                x='year(date):T',
+#                y='mean(polarity)',
+#                color=alt.Color('listing_id:O', scale=alt.Scale(scheme= 'dark2'))
+#            ).interactive()
+#    return plot
+#
+## plot the sentiment changes over time by year for the recommended listings
+#rec_listing_ids = recomended_listings['listing_id'].values
+#sentiment_plot = plot_listing_sentiment_over_time(review_df, rec_listing_ids)
+#
+## write a note
+#st.header('Rental review sentiment trends')
+## plot the figure
+#st.altair_chart(sentiment_plot, use_container_width=True)
+#
+#
+#################################################################
+## ##### add rental description wordcloud #####
+#
+##### TODO:
+## how to run the code section one by one istead of starting from begainning when choosing different recommendation listing
+#
+#
+#@st.cache_data
+#def make_wordcloud(df, col, listing_id, stop_words, mask=None):
+#
+#    if listing_id in df['listing_id'].values:
+#        text = df[df['listing_id'] == listing_id][col].values[0]
+#        wordcloud = WordCloud(width = 100,
+#                              height = 100,
+#                              stopwords=stop_words,
+#                              scale=10,
+#                              colormap = 'PuRd',
+#                              background_color ='black',
+##                               mask = None,
+#                              max_words=100,
+#                             ).generate(text)
+#
+#        fig, ax = plt.subplots(figsize=(4,4))
+#        ax.imshow(wordcloud, interpolation="bilinear")
+#        ax.axis("off")
+#        plt.show()
+#        st.pyplot(fig)
+#    else:
+#        print('Oops, this listing currently has no comments.')
+#        st.write('Oops, this listing currently has no comments.')
+#
+## generate wordcloud for a recommended listing (has comments)
+#st.header('Word cloud for rental description')
+#st.subheader('Pick a top n recommendation for more info')
+#wordcloud_STOPWORDS = STOPWORDS
+#
+## get a top n listing id from the user
+#selected_listing_id = st.selectbox("Choose listing id:", recomended_listings['listing_id'])
+#index = recomended_listings['listing_id'].tolist().index(selected_listing_id)
+#link = recomended_listings.listing_url.tolist()[index]
+#
+## Show name and URL of selected property
+#st.write("\"{}\" - [{}]({})".format(recomended_listings.listing_name.tolist()[index],link,link))
+#
+## Draw the word cloud
+#make_wordcloud(df_rec,'cleaned_content', selected_listing_id, wordcloud_STOPWORDS, mask=None)
+#
+## # generate wordcloud using a button
+## ok = st.button("Make Wordcloud for the rental description")
+## if ok:
+##     with st.spinner('Making Wordcloud...'):
+##         make_wordcloud(df_rec,'cleaned_content', selected_listing_id, wordcloud_STOPWORDS, mask=None)
+##     st.success('Done!')
+#
+#
 ################################################################
-##### add review sentiment plot for the recommended listings #####
-
-#### ISSUES TODO:  the wordcloud code only use the first recomendation as example
-# 1. change the trends legend labels from listing_id to recommendation_n for users!!
-
-
-@st.cache_data
-def get_review_data():
-    # directly read the saved cleaned_review_with_polarity dataset
-    review_df = pd.read_pickle('data/cleaned_v2/cleaned_review_with_polarity.zip')
-    # print(review_df.shape)
-    # review_df.head(2)
-    return review_df
-review_df = get_review_data()
-
-# make plot
-# notice: altair can only take <=5000 rows, so cannot show all listings at once
-@st.cache_data
-def plot_listing_sentiment_over_time(df,listing_id = None):
-    sub_df = df[df['listing_id'].isin(listing_id)]
-
-    plot = alt.Chart(sub_df, width=500).mark_line().encode(
-                x='year(date):T',
-                y='mean(polarity)',
-                color=alt.Color('listing_id:O', scale=alt.Scale(scheme= 'dark2'))
-            ).interactive()
-    return plot
-
-# plot the sentiment changes over time by year for the recommended listings
-rec_listing_ids = recomended_listings['listing_id'].values
-sentiment_plot = plot_listing_sentiment_over_time(review_df, rec_listing_ids)
-
-# write a note
-st.header('Rental review sentiment trends')
-# plot the figure
-st.altair_chart(sentiment_plot, use_container_width=True)
-
-
-################################################################
-# ##### add rental description wordcloud #####
-
-#### TODO:
-# how to run the code section one by one istead of starting from begainning when choosing different recommendation listing
-
-
-@st.cache_data
-def make_wordcloud(df, col, listing_id, stop_words, mask=None):
-
-    if listing_id in df['listing_id'].values:
-        text = df[df['listing_id'] == listing_id][col].values[0]
-        wordcloud = WordCloud(width = 100,
-                              height = 100,
-                              stopwords=stop_words,
-                              scale=10,
-                              colormap = 'PuRd',
-                              background_color ='black',
-#                               mask = None,
-                              max_words=100,
-                             ).generate(text)
-
-        fig, ax = plt.subplots(figsize=(4,4))
-        ax.imshow(wordcloud, interpolation="bilinear")
-        ax.axis("off")
-        plt.show()
-        st.pyplot(fig)
-    else:
-        print('Oops, this listing currently has no comments.')
-        st.write('Oops, this listing currently has no comments.')
-
-# generate wordcloud for a recommended listing (has comments)
-st.header('Word cloud for rental description')
-st.subheader('Pick a top n recommendation for more info')
-wordcloud_STOPWORDS = STOPWORDS
-
-# get a top n listing id from the user
-selected_listing_id = st.selectbox("Choose listing id:", recomended_listings['listing_id'])
-index = recomended_listings['listing_id'].tolist().index(selected_listing_id)
-link = recomended_listings.listing_url.tolist()[index]
-
-# Show name and URL of selected property
-st.write("\"{}\" - [{}]({})".format(recomended_listings.listing_name.tolist()[index],link,link))
-
-# Draw the word cloud
-make_wordcloud(df_rec,'cleaned_content', selected_listing_id, wordcloud_STOPWORDS, mask=None)
-
-# # generate wordcloud using a button
-# ok = st.button("Make Wordcloud for the rental description")
-# if ok:
-#     with st.spinner('Making Wordcloud...'):
-#         make_wordcloud(df_rec,'cleaned_content', selected_listing_id, wordcloud_STOPWORDS, mask=None)
-#     st.success('Done!')
-
-
-###############################################################
-##### add rental review wordcloud #####
-
-# generate review wordcloud 
-st.header('Word cloud for rental reviews')
-
-# Show name and URL of selected property
-st.write("\"{}\" - [{}]({})".format(recomended_listings.listing_name.tolist()[index],link,link))
-
-# Draw the word cloud
-make_wordcloud(df_rec,'comments_nouns_adjs', selected_listing_id, wordcloud_STOPWORDS, mask=None)
-
-
-################################################################
-##### add rental review report #####
-
-def get_review_sentiment_report(df,col,listing_id):
-
-    if listing_id in df['listing_id'].values:
-        # segement all comments into sentences for the given listing
-        review_sentences = df[df['listing_id'] == listing_id]['comments'].apply(lambda x: re.sub("(<.*?>)|([\t\r])","",x)).str.split('.').values.tolist()[0]
-        num_review_sentences = len(review_sentences)
-
-        # get polarity score of both the positives and negatives for each sentence in all the comments
-        neg_sentences = []
-        pos_sentences = []
-        # nutrual_comment = []
-        for i, text in enumerate(review_sentences):
-            score = SentimentIntensityAnalyzer().polarity_scores(text)['compound']
-            if score < 0:
-                neg_sentences.append((score,review_sentences[i]))
-            elif score > 0:
-                pos_sentences.append((score,review_sentences[i]))
-            else:
-                pass
-
-        neg_percent = round(len(neg_sentences)/num_review_sentences*100,2)
-        pos_percent = round(len(pos_sentences)/num_review_sentences*100,2)
-        sorted_neg_sentences = [comment for score, comment in sorted(neg_sentences, key=lambda x: x[0])]
-        sorted_pos_sentences = [comment for score, comment in sorted(pos_sentences, key=lambda x: x[0])]
-        st.subheader("Overall:")
-        st.write("{}% of all the reviews sentences ({}/{}) on Airbnb for this listing are positive!".format(pos_percent, len(pos_sentences),num_review_sentences))
-        st.write("{}% of them ({}/{}) are negative.".format(neg_percent,len(neg_sentences),num_review_sentences))
-        # st.write('---------------')
-        st.subheader("Helpful negative sentences: ")
-
-        if len(sorted_neg_sentences) >0:
-            for i, sentence in enumerate(sorted_neg_sentences):
-                st.write("{}: {}".format(i+1, sentence)) # need to yield every 3 items from a list
-        else:
-            st.write("Wow, this listing currently doesn't have any negative sentences!)")
-    else:
-        st.write('Oops, this listing currently has no comments.')
-
-    return sorted_neg_sentences, sorted_pos_sentences
-
-
-# generate review report for a recommended listing (has comments)
-st.header('Rental review report')
-
-# Show name and URL of selected property
-st.write("\"{}\" - [{}]({})".format(recomended_listings.listing_name.tolist()[index],link,link))
-
-# Draw the word cloud
-sorted_neg_sentences, sorted_pos_sentences = get_review_sentiment_report(df_rec,'comments',selected_listing_id)
+###### add rental review wordcloud #####
+#
+## generate review wordcloud
+#st.header('Word cloud for rental reviews')
+#
+## Show name and URL of selected property
+#st.write("\"{}\" - [{}]({})".format(recomended_listings.listing_name.tolist()[index],link,link))
+#
+## Draw the word cloud
+#make_wordcloud(df_rec,'comments_nouns_adjs', selected_listing_id, wordcloud_STOPWORDS, mask=None)
+#
+#
+#################################################################
+###### add rental review report #####
+#
+#def get_review_sentiment_report(df,col,listing_id):
+#
+#    if listing_id in df['listing_id'].values:
+#        # segement all comments into sentences for the given listing
+#        review_sentences = df[df['listing_id'] == listing_id]['comments'].apply(lambda x: re.sub("(<.*?>)|([\t\r])","",x)).str.split('.').values.tolist()[0]
+#        num_review_sentences = len(review_sentences)
+#
+#        # get polarity score of both the positives and negatives for each sentence in all the comments
+#        neg_sentences = []
+#        pos_sentences = []
+#        # nutrual_comment = []
+#        for i, text in enumerate(review_sentences):
+#            score = SentimentIntensityAnalyzer().polarity_scores(text)['compound']
+#            if score < 0:
+#                neg_sentences.append((score,review_sentences[i]))
+#            elif score > 0:
+#                pos_sentences.append((score,review_sentences[i]))
+#            else:
+#                pass
+#
+#        neg_percent = round(len(neg_sentences)/num_review_sentences*100,2)
+#        pos_percent = round(len(pos_sentences)/num_review_sentences*100,2)
+#        sorted_neg_sentences = [comment for score, comment in sorted(neg_sentences, key=lambda x: x[0])]
+#        sorted_pos_sentences = [comment for score, comment in sorted(pos_sentences, key=lambda x: x[0])]
+#        st.subheader("Overall:")
+#        st.write("{}% of all the reviews sentences ({}/{}) on Airbnb for this listing are positive!".format(pos_percent, len(pos_sentences),num_review_sentences))
+#        st.write("{}% of them ({}/{}) are negative.".format(neg_percent,len(neg_sentences),num_review_sentences))
+#        # st.write('---------------')
+#        st.subheader("Helpful negative sentences: ")
+#
+#        if len(sorted_neg_sentences) >0:
+#            for i, sentence in enumerate(sorted_neg_sentences):
+#                st.write("{}: {}".format(i+1, sentence)) # need to yield every 3 items from a list
+#        else:
+#            st.write("Wow, this listing currently doesn't have any negative sentences!)")
+#    else:
+#        st.write('Oops, this listing currently has no comments.')
+#
+#    return sorted_neg_sentences, sorted_pos_sentences
+#
+#
+## generate review report for a recommended listing (has comments)
+#st.header('Rental review report')
+#
+## Show name and URL of selected property
+#st.write("\"{}\" - [{}]({})".format(recomended_listings.listing_name.tolist()[index],link,link))
+#
+## Draw the word cloud
+#sorted_neg_sentences, sorted_pos_sentences = get_review_sentiment_report(df_rec,'comments',selected_listing_id)

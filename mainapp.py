@@ -34,6 +34,6 @@ st.set_page_config(
 st.title('AirBnb Rentals in Seattle')
 st.write('Hello from team-spirit :)')
 
-st.subheader('DEBUG, branch from xinqian_branch_2 to cliff_awsdebug_2 v0.1')
+st.write('DEBUG, branch from xinqian_branch_2 to cliff_awsdebug_2 v0.2')
 
 
