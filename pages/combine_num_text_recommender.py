@@ -413,7 +413,7 @@ def update_recommend_listing(recomended_list, filtered_std_df, original_df, n):
             listing_id = list(recomended_list.loc[recomended_list['cluster']==cluster_label]['listing_id'])
             if len(filtered_std_df) >= n:
                 df_std_new = filtered_std_df.loc[(filtered_std_df['cluster']==cluster_label)&(listing_id not in filtered_std_df['listing_id'].to_list())]
-                df_d = pd.DataFrame(get_pca_df(df_std_new.iloc[:,:-3],threshold=0.9)[0], columns=list(df_std_new.iloc[:,:-3].columns)).T
+                df_d = pd.DataFrame(pca_component(df_std_new.iloc[:,:-3]), columns=list(df_std_new.iloc[:,:-3].columns)).T
                 new_id = df_std_new.sort_values(df_d.iloc[:,0].sort_values(ascending=False)[:1].index[0],
                            ascending=False).head(n-len(listing_id))['listing_id']
 
