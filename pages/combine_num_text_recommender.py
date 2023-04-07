@@ -375,7 +375,7 @@ def get_recommendations(df, input_query, _tfidf_matrix, n=5):
     query_vector = tfidf_vectorizer.transform(tokens)
 
     # get similarity
-    similarity = cosine_similarity(query_vector, tfidf_matrix)
+    similarity = cosine_similarity(query_vector, _tfidf_matrix)
 
     # best cosine distance for each token independantly
     best_index = extract_best_indices(similarity, top_n=n)
