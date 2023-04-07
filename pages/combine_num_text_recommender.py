@@ -448,8 +448,8 @@ def update_recommend_listing(recomended_list, filtered_std_df, original_df, n):
                                                                   'amenities',
                                                                   'comments',
                                                                   'review_scores_rating']]
-            df_recommend['recommendations'] = ['recommendation_'+ str(i) for i in range(1,len(df_recommend)+1)]
             df_recommend = df_recommend.sort_values('similarity',ascending=False)
+            df_recommend['recommendations'] = ['recommendation_'+ str(i) for i in range(1,len(df_recommend)+1)]
     if len(recomended_list['cluster'].value_counts()) == 1:
         df_recommend = recomended_list
         df_recommend = df_recommend.sort_values('similarity',ascending=False)
