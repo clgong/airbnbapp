@@ -406,7 +406,7 @@ def get_recommendations(df,similarity, n=5):
                                   'host_about',
                                   'amenities',
                                   'comments',
-                                  'review_scores_rating']]
+                                  'review_scores_rating']].sort_values('similarity',ascending=False)
     return result_df
 
 # Try the recommender system
@@ -452,7 +452,7 @@ def update_recommend_listing(recomended_list, filtered_std_df, original_df, n):
             df_recommend['recommendations'] = ['recommendation_'+ str(i) for i in range(1,len(df_recommend)+1)]
     if len(recomended_list['cluster'].value_counts()) == 1:
         df_recommend = recomended_list
-        df_recommend = df_recommend.sort_values('similarity',ascending=False)
+
 
     return df_recommend
 
