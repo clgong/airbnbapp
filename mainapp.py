@@ -31,11 +31,12 @@ st.set_page_config(
 )
 
 st.title('AirBnb Rentals in Seattle')
+
 st.write('Hello from team-spirit :)')
 
 st.write('Streamlit version: '+st.__version__)
 
-st.subheader("AWS debug: 0.3")
+st.subheader("AWS debug: 0.4")
 if st.button('Pull from git'):
     subprocess.run("git pull origin", shell=True)
     st.experimental_rerun()

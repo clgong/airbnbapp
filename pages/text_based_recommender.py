@@ -118,7 +118,7 @@ def preprocess_text(text, stopwords = nltk_STOPWORDS, stem=False, lemma=False):
     return text
 
 ##### Vectorize data
-@st.cache_data
+@st.cache_resource
 def vectorize_data(corpus):
     # TfidfVectorizer
     tfidf_vectorizer = TfidfVectorizer(
