@@ -336,10 +336,27 @@ def vectorize_data(corpus):
     tfidf_matrix = tfidf_vectorizer.fit_transform(corpus)
 
     return tfidf_vectorizer, tfidf_matrix
+    
+####### Vectorize data from pickle
+#@st.cache_data
+#def vectorize_data():
+#    # load tfidf vectorizer and do the transformation
+#    tfidf_vectorizer = pd.read_pickle(("data/cleaned_v2/tfidf_vectorizer.pk"))
+#    tfidf_matrix = pd.read_pickle(("data/cleaned_v2/tfidf_matrix.pk"))
+#    # tfidf_matrix = tfidf_vectorizer.transform(corpus).todense()
+#    tfidf_matrix = np.asarray(tfidf_matrix)
+#
+#    return tfidf_vectorizer, tfidf_matrix
 
 # get corpus
 corpus = df_filter['cleaned_content'].values
 tfidf_vectorizer, tmatrix = vectorize_data(corpus)
+
+# Hack, the first run we have to dump the data to pickle. TODO: port this to server startup script
+import pickle
+with open('data/cleaned_v2/tfidf_matrix.pk','wb') as file:
+    pickle.dump(tfidf_matrix,file)
+
 # st.write(tfidf_matrix.shape)
 
 ##### get similarity
