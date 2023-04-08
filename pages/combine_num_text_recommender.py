@@ -355,7 +355,7 @@ tfidf_vectorizer, tmatrix = vectorize_data(corpus)
 # Hack, the first run we have to dump the data to pickle. TODO: port this to server startup script
 import pickle
 with open('data/cleaned_v2/tfidf_matrix.pk','wb') as file:
-    pickle.dump(tfidf_matrix,file)
+    pickle.dump(tmatrix,file)
 
 # st.write(tfidf_matrix.shape)
 
