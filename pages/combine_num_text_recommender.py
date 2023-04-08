@@ -382,12 +382,11 @@ def get_recommendations(df, input_query, _tfidf_matrix, n=5):
 
     # return the top n similar listing ids and raw comments
     result_df = df.loc[best_index,:]
-    result_df['recommendations'] = ['recommendation_'+ str(i) for i in range(1,len(result_df)+1)]
-    result_df = result_df.loc[:, ['recommendations','cluster',
-                                      'similarity', 'price',
+    result_df = result_df.loc[:, [
                                       'listing_id',
                                       'listing_url',
                                       'listing_name',
+                                      'price',
                                       'description',
                                       'room_type',
                                       'property_type',
@@ -423,12 +422,11 @@ def update_recommend_listing(recomended_list, filtered_std_df, original_df, n):
                                            .isin(updated_list)]
                 df_recommend = df_recommend.sort_values('similarity',ascending=False)
                 df_recommend['recommendations'] = ['recommendation_'+ str(i) for i in range(1,len(df_recommend)+1)]
-                df_recommend = df_recommend[['recommendations', 'cluster',
-                                                       'similarity',
-                                                       'price',
+                df_recommend = df_recommend[[
                                                        'listing_id',
                                                        'listing_url',
                                                        'listing_name',
+                                                       'price',
                                                        'description',
                                                        'room_type',
                                                        'property_type',
@@ -442,13 +440,11 @@ def update_recommend_listing(recomended_list, filtered_std_df, original_df, n):
             else:
                 df_recommend = original_df.loc[(original_df['cluster']==cluster_label)]
                 df_recommend = df_recommend.sort_values('similarity',ascending=False)
-                df_recommend['recommendations'] = ['recommendation_'+ str(i) for i in range(1,len(df_recommend)+1)]
-                df_recommend = df_recommend[['recommendations', 'cluster',
-                                                                       'similarity',
-                                                                       'price',
+                df_recommend = df_recommend[[
                                                                        'listing_id',
                                                                        'listing_url',
                                                                        'listing_name',
+                                                                       'price',
                                                                        'description',
                                                                        'room_type',
                                                                        'property_type',
