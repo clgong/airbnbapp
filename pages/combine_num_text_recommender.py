@@ -68,7 +68,7 @@ st.header('Try the customized recommender in UI')
 #make a price query slider
 price_range = st.slider("Please choose your preferred price range",
                         value = [50,2000])
-st.write("Your preferred price range:", price_range)
+st.write("Your expected price range:", price_range)
 submit_price = st.button('Confirm')
 
 
