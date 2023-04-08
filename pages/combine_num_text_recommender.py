@@ -465,9 +465,11 @@ def update_recommend_listing(recomended_list, filtered_std_df, original_df, n):
                                                'host_about',
                                                'amenities',
                                                'comments','review_scores_rating']]
+    df_recommend = df_recommend.reset_index().iloc[:,1:]
+    df_recommedn.index = np.arange(1,len(df_recommend)+1)
 
 
-    return df_recommend.reset_index().iloc[:,1:]
+    return df_recommend
 
 # Try the combined recommender system
 recomended_listings_update = update_recommend_listing(recomended_listings, df_filter_std, df_filter, n=5)
