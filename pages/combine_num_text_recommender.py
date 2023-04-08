@@ -394,7 +394,7 @@ def get_recommendations(df, input_query, _tfidf_matrix, n=5):
                                       'neighbourhood_group_cleansed',
                                       'host_about',
                                       'amenities',
-                                      'comments','review_scores_rating']]
+                                      'comments','review_scores_rating','cluster','similarity']].sort_values('similarity', ascending=False)
 
     return result_df
 
@@ -419,7 +419,6 @@ def update_recommend_listing(recomended_list, filtered_std_df, original_df, n):
                 df_recommend = original_df.loc[original_df['listing_id']\
                                            .isin(updated_list)]
                 df_recommend = df_recommend.sort_values('similarity',ascending=False)
-                df_recommend['recommendations'] = ['recommendation_'+ str(i) for i in range(1,len(df_recommend)+1)]
                 df_recommend = df_recommend[['listing_id',
                                              'listing_url',
                                              'listing_name',
@@ -453,10 +452,22 @@ def update_recommend_listing(recomended_list, filtered_std_df, original_df, n):
                                               'review_scores_rating']]
 
     if len(recomended_list['cluster'].value_counts()) == 1:
-        df_recommend = recomended_list
+        df_recommend = recomended_list.loc[:, ['listing_id',
+                                               'listing_url',
+                                               'listing_name',
+                                               'price',
+                                               'description',
+                                               'room_type',
+                                               'property_type',
+                                               'neighborhood_overview',
+                                               'neighbourhood_cleansed',
+                                               'neighbourhood_group_cleansed',
+                                               'host_about',
+                                               'amenities',
+                                               'comments','review_scores_rating']]
 
 
-    return df_recommend
+    return df_recommend.reset_index().iloc[:,1:]
 
 # Try the combined recommender system
 recomended_listings_update = update_recommend_listing(recomended_listings, df_filter_std, df_filter, n=5)
