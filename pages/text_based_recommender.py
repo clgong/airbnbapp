@@ -2,14 +2,13 @@
 
 
 """
- UPDATE Apr 6: (add/delete dataset)
- 1.use the finalized dataset cleaned_listing_finalized_for_streamlit
- 2.removed picke lib, use pandas to load the pickled file
- 3. added price column and edited some words
+ UPDATE Apr 8: # UPDATE: April 8, fixed wordcloud error
+ 1.fixed wordcloud error when  no values in content/comment
+ 2.added price filter for quick test
 
 """
 
-## add some comment here for test 2
+## add some comment here for test 3
 
 # import libraries
 import streamlit as st
@@ -60,6 +59,12 @@ st.write('test april 8 xinqian')
 # header
 st.header('Try the customized recommender in UI')
 
+#make a price query slider
+price_range = st.slider("Please choose your preferred price range",
+                        value = [50,5000])
+st.write("Your preferred price range:", price_range)
+submit_price = st.button('Confirm')
+
 #make an input box
 defult_input = "I want a private room close to uw campus with parking and coffee shop."
 input_query = st.text_input("Please describe the rental you're looking for here ",defult_input)
@@ -98,7 +103,14 @@ def get_data():
     return df_rec
 
 df_rec = get_data()
-# st.write(df_rec.shape)
+st.write(df_rec.shape)
+# st.write(df_rec.head(2))
+
+# use filtered dataframe for test
+df_rec = df_rec.loc[(df_rec['price'] < price_range[1]) &(df_rec['price'] > price_range[0])]
+# df_filter_std = listing_trans.loc[listing_trans['listing_id'].isin(df_filter['listing_id'])]
+df_rec = df_rec.reset_index()
+st.write(df_rec.shape)
 # st.write(df_rec.head(2))
 
 ##### preprocess input query
@@ -236,36 +248,39 @@ st.header('Rental review sentiment trends')
 st.altair_chart(sentiment_plot, use_container_width=True)
 
 
-################################################################
-# ##### add rental description wordcloud #####
+# ################################################################
+# # ##### add rental description wordcloud #####
 
-#### TODO:
-# how to run the code section one by one istead of starting from begainning when choosing different recommendation listing
+# #### TODO:
+# # how to run the code section one by one istead of starting from begainning when choosing different recommendation listing
 
-
+# UPDATE: April 8, fixed error wordcloud when there's no comment/description content
 @st.cache_data
 def make_wordcloud(df, col, listing_id, stop_words, mask=None):
 
     if listing_id in df['listing_id'].values:
         text = df[df['listing_id'] == listing_id][col].values[0]
-        wordcloud = WordCloud(width = 100,
-                              height = 100,
-                              stopwords=stop_words,
-                              scale=10,
-                              colormap = 'PuRd',
-                              background_color ='black',
-#                               mask = None,
-                              max_words=100,
-                             ).generate(text)
+        if type(text) == str:
+            wordcloud = WordCloud(width = 100,
+                        height = 100,
+                        stopwords=stop_words,
+                        scale=10,
+                        colormap = 'PuRd',
+                        background_color ='black',
+#                       mask = None,
+                        max_words=100,
+                        ).generate(text)
 
-        fig, ax = plt.subplots(figsize=(4,4))
-        ax.imshow(wordcloud, interpolation="bilinear")
-        ax.axis("off")
-        plt.show()
-        st.pyplot(fig)
-    else:
-        print('Oops, this listing currently has no comments.')
-        st.write('Oops, this listing currently has no comments.')
+            fig, ax = plt.subplots(figsize=(4,4))
+            ax.imshow(wordcloud, interpolation="bilinear")
+            ax.axis("off")
+            plt.show()
+            st.pyplot(fig)
+        else:
+            if 'comment' in col:
+                st.write('Oops, this listing currently has no comments.')
+            else:
+                st.write('Oops, this listing currently has no descriptions.')
 
 # generate wordcloud for a recommended listing (has comments)
 st.header('Word cloud for rental description')
@@ -283,12 +298,12 @@ st.write("\"{}\" - [{}]({})".format(recomended_listings.listing_name.tolist()[in
 # Draw the word cloud
 make_wordcloud(df_rec,'cleaned_content', selected_listing_id, wordcloud_STOPWORDS, mask=None)
 
-# # generate wordcloud using a button
-# ok = st.button("Make Wordcloud for the rental description")
-# if ok:
-#     with st.spinner('Making Wordcloud...'):
-#         make_wordcloud(df_rec,'cleaned_content', selected_listing_id, wordcloud_STOPWORDS, mask=None)
-#     st.success('Done!')
+# generate wordcloud using a button
+ok = st.button("Make Wordcloud for the rental description")
+if ok:
+    with st.spinner('Making Wordcloud...'):
+        make_wordcloud(df_rec,'cleaned_content', selected_listing_id, wordcloud_STOPWORDS, mask=None)
+    st.success('Done!')
 
 
 ###############################################################
