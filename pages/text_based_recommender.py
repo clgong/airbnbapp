@@ -55,6 +55,7 @@ st.set_page_config(
 st.title('AirBnb Rentals in Seattle')
 st.write('Hello from team-spirit :)')
 st.write('Streamlit version: '+st.__version__)
+st.write('test april 8 xinqian')
 
 # header
 st.header('Try the customized recommender in UI')
