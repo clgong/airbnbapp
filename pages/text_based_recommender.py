@@ -2,9 +2,10 @@
 
 
 """
- UPDATE Apr 8: # UPDATE: April 8, fixed wordcloud error
- 1.fixed wordcloud error when  no values in content/comment
- 2.added price filter for quick test
+ UPDATE Apr 10: updated review report result
+ 1.updated the review report output when there's empty comment
+ 2. added narrative to review sentiment trends if no trend is shown
+ 3. added 'number_of_reviews' col to the recommendation table
 
 """
 
@@ -37,7 +38,7 @@ nltk.download('punkt')
 nltk.download('wordnet')
 nltk.download('omw-1.4')
 nltk.download('averaged_perceptron_tagger')
-nltk.download('vader_lexicon') 
+nltk.download('vader_lexicon')
 
 from nltk import word_tokenize, pos_tag
 from nltk.tokenize import RegexpTokenizer
@@ -68,7 +69,7 @@ submit_price = st.button('Confirm')
 #make an input box
 defult_input = "I want a private room close to uw campus with parking and coffee shop."
 input_query = st.text_input("Please describe the rental you're looking for here ",defult_input)
-submit = st.button('Submit')  ## submit buttion 
+submit = st.button('Submit')  ## submit buttion
 
 
 # TODO: run the code below after click the submit button instead of running the code automatically
@@ -86,8 +87,8 @@ def get_data():
     # directly load the saved dataset
     df = pd.read_pickle('data/cleaned_v2/cleaned_listing_finalized_for_streamlit.zip')
     # select cols
-    listing_cols = ['listing_id','listing_url','price',''
-                    'review_scores_rating', 'polarity',
+    listing_cols = ['listing_id','listing_url','price',
+                    'number_of_reviews','review_scores_rating', 'polarity',
                     'comments', 'comments_nouns_adjs']
     # get content cols
     content_cols = ['listing_name', 'description',
@@ -103,14 +104,14 @@ def get_data():
     return df_rec
 
 df_rec = get_data()
-st.write(df_rec.shape)
+# st.write(df_rec.shape)
 # st.write(df_rec.head(2))
 
 # use filtered dataframe for test
 df_rec = df_rec.loc[(df_rec['price'] < price_range[1]) &(df_rec['price'] > price_range[0])]
 # df_filter_std = listing_trans.loc[listing_trans['listing_id'].isin(df_filter['listing_id'])]
 df_rec = df_rec.reset_index()
-st.write(df_rec.shape)
+# st.write(df_rec.shape)
 # st.write(df_rec.head(2))
 
 ##### preprocess input query
@@ -137,7 +138,7 @@ def preprocess_text(text, stopwords = nltk_STOPWORDS, stem=False, lemma=False):
     text = ' '.join(text)
     return text
 
-##### Vectorize data
+##### Vectorize data live
 @st.cache_data
 def vectorize_data(corpus):
     # load tfidf vectorizer and do the transformation
@@ -147,11 +148,22 @@ def vectorize_data(corpus):
 
     return tfidf_vectorizer, tfidf_matrix
 
+# ###### Vectorize data from pickle
+# @st.cache_data
+# def vectorize_data():
+#     # load tfidf vectorizer and do the transformation
+#     tfidf_vectorizer = pd.read_pickle(("data/cleaned_v2/tfidf_vectorizer.pk"))
+#     tfidf_matrix = pd.read_pickle(("data/cleaned_v2/tfidf_matrix.pk"))
+#     # tfidf_matrix = tfidf_vectorizer.transform(corpus).todense()
+#     tfidf_matrix = np.asarray(tfidf_matrix)
+
+#     return tfidf_vectorizer, tfidf_matrix
 
 # get corpus
 corpus = df_rec['content'].values
-tfidf_vectorizer, tfidf_matrix = vectorize_data(corpus)
-# st.write(tfidf_matrix.shape)
+tfidf_vectorizer, tfidf_matrix = vectorize_data(corpus)    # live
+# tfidf_vectorizer, tfidf_matrix = vectorize_data()    # from pickle
+
 
 ##### get similarity
 @st.cache_data
@@ -198,7 +210,7 @@ def get_recommendations(df,similarity, n=5):
     result_df = result_df.loc[:, ['listing_id', 'listing_url','listing_name', 'description',
                                  'price','room_type','property_type',
                                  'neighborhood_overview', 'neighbourhood_cleansed', 'neighbourhood_group_cleansed',
-                                 'host_about', 'amenities', 'review_scores_rating']]
+                                 'host_about', 'amenities', 'number_of_reviews', 'review_scores_rating']]
     result_df.reset_index(drop=True, inplace=True)
     return result_df
 
@@ -244,6 +256,7 @@ sentiment_plot = plot_listing_sentiment_over_time(review_df, rec_listing_ids)
 
 # write a note
 st.header('Rental review sentiment trends')
+st.write("(Note: no trending line if the rental doesn't have comment or it only have reviews in year 2022.)")
 # plot the figure
 st.altair_chart(sentiment_plot, use_container_width=True)
 
@@ -298,12 +311,12 @@ st.write("\"{}\" - [{}]({})".format(recomended_listings.listing_name.tolist()[in
 # Draw the word cloud
 make_wordcloud(df_rec,'cleaned_content', selected_listing_id, wordcloud_STOPWORDS, mask=None)
 
-# generate wordcloud using a button
-ok = st.button("Make Wordcloud for the rental description")
-if ok:
-    with st.spinner('Making Wordcloud...'):
-        make_wordcloud(df_rec,'cleaned_content', selected_listing_id, wordcloud_STOPWORDS, mask=None)
-    st.success('Done!')
+# # generate wordcloud using a button
+# ok = st.button("Make Wordcloud for the rental description")
+# if ok:
+#     with st.spinner('Making Wordcloud...'):
+#         make_wordcloud(df_rec,'cleaned_content', selected_listing_id, wordcloud_STOPWORDS, mask=None)
+#     st.success('Done!')
 
 
 ###############################################################
@@ -324,43 +337,48 @@ make_wordcloud(df_rec,'comments_nouns_adjs', selected_listing_id, wordcloud_STOP
 
 def get_review_sentiment_report(df,col,listing_id):
 
+    sorted_neg_sentences = np.nan
+    sorted_pos_sentences = np.nan
+
     if listing_id in df['listing_id'].values:
-        # segement all comments into sentences for the given listing
-        review_sentences = df[df['listing_id'] == listing_id]['comments'].apply(lambda x: re.sub("(<.*?>)|([\t\r])","",x)).str.split('.').values.tolist()[0]
-        num_review_sentences = len(review_sentences)
-
-        # get polarity score of both the positives and negatives for each sentence in all the comments
-        neg_sentences = []
-        pos_sentences = []
-        # nutrual_comment = []
-        for i, text in enumerate(review_sentences):
-            score = SentimentIntensityAnalyzer().polarity_scores(text)['compound']
-            if score < 0:
-                neg_sentences.append((score,review_sentences[i]))
-            elif score > 0:
-                pos_sentences.append((score,review_sentences[i]))
-            else:
-                pass
-
-        neg_percent = round(len(neg_sentences)/num_review_sentences*100,2)
-        pos_percent = round(len(pos_sentences)/num_review_sentences*100,2)
-        sorted_neg_sentences = [comment for score, comment in sorted(neg_sentences, key=lambda x: x[0])]
-        sorted_pos_sentences = [comment for score, comment in sorted(pos_sentences, key=lambda x: x[0])]
-        st.subheader("Overall:")
-        st.write("{}% of all the reviews sentences ({}/{}) on Airbnb for this listing are positive!".format(pos_percent, len(pos_sentences),num_review_sentences))
-        st.write("{}% of them ({}/{}) are negative.".format(neg_percent,len(neg_sentences),num_review_sentences))
-        # st.write('---------------')
-        st.subheader("Helpful negative sentences: ")
-
-        if len(sorted_neg_sentences) >0:
-            for i, sentence in enumerate(sorted_neg_sentences):
-                st.write("{}: {}".format(i+1, sentence)) # need to yield every 3 items from a list
+        comments = df[df['listing_id'] == listing_id]['comments'].values[0]
+        if len(comments) <=1:
+            st.write('Oops, this listing currently has no comments.')
+            return sorted_neg_sentences, sorted_pos_sentences
         else:
-            st.write("Wow, this listing currently doesn't have any negative sentences!)")
-    else:
-        st.write('Oops, this listing currently has no comments.')
+            # segement all comments into sentences for the given listing
+            review_sentences = df[df['listing_id'] == listing_id]['comments'].apply(lambda x: re.sub("(<.*?>)|([\t\r])","",x)).str.split('.').values.tolist()[0]
+            num_review_sentences = len(review_sentences)
 
-    return sorted_neg_sentences, sorted_pos_sentences
+            # get polarity score of both the positives and negatives for each sentence in all the comments
+            neg_sentences = []
+            pos_sentences = []
+            # nutrual_comment = []
+            for i, text in enumerate(review_sentences):
+                score = SentimentIntensityAnalyzer().polarity_scores(text)['compound']
+                if score < 0:
+                    neg_sentences.append((score,review_sentences[i]))
+                elif score > 0:
+                    pos_sentences.append((score,review_sentences[i]))
+                else:
+                    pass
+
+            neg_percent = round(len(neg_sentences)/num_review_sentences*100,2)
+            pos_percent = round(len(pos_sentences)/num_review_sentences*100,2)
+            sorted_neg_sentences = [comment for score, comment in sorted(neg_sentences, key=lambda x: x[0])]
+            sorted_pos_sentences = [comment for score, comment in sorted(pos_sentences, key=lambda x: x[0])]
+            st.subheader("Overall:")
+            st.write("{}% of all the reviews sentences ({}/{}) on Airbnb for this listing are positive!".format(pos_percent, len(pos_sentences),num_review_sentences))
+            st.write("{}% of them ({}/{}) are negative.".format(neg_percent,len(neg_sentences),num_review_sentences))
+            # st.write('---------------')
+            st.subheader("Helpful negative sentences: ")
+
+            if len(sorted_neg_sentences) >0:
+                for i, sentence in enumerate(sorted_neg_sentences):
+                    st.write("{}: {}".format(i+1, sentence)) # need to yield every 3 items from a list
+            else:
+                st.write("Wow, this listing currently doesn't have any negative sentences!)")
+        return sorted_neg_sentences, sorted_pos_sentences
 
 
 # generate review report for a recommended listing (has comments)
