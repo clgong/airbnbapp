@@ -509,18 +509,14 @@ def plot_listing_sentiment_over_time(df,listing_id = None):
             ).interactive()
     st.altair_chart(plot, use_container_width=True)
 
-# plot the sentiment changes over time by year for the recommended listings
-rec_listing_ids = recomended_listings_update['listing_id'].values
-sentiment_plot = plot_listing_sentiment_over_time(review_df, rec_listing_ids)
-
 
 # write a note
 st.header('Rental review sentiment trends')
 st.write("(Note: the trendline will not be shown if the rental only has comments for 2022, and the listing_id will not be shown in the legend if the rental doesn't have any comments.)")
 
-# plot the figure
-rec_listing_ids = recomended_listings['listing_id'].values
-plot_listing_sentiment_over_time(review_df, rec_listing_ids)
+# plot the sentiment changes over time by year for the recommended listings
+rec_listing_ids = recomended_listings_update['listing_id'].values
+sentiment_plot = plot_listing_sentiment_over_time(review_df, rec_listing_ids)
 
 
 
