@@ -60,7 +60,10 @@ st.write('Hello from team-spirit :)')
 st.write('Streamlit version: '+st.__version__)
 
 # header
-st.header('Try the customized recommender in UI')
+st.header('Try the text based recommender')
+st.write('This recommender only uses the text from the fields below: ')
+st.write('[listing_name, description, host_name, host_location, host_about, host_response_time, host_neighbourhood, host_verifications, neighbourhood_cleansed, neighbourhood_group_cleansed, neighborhood_overview, property_type, room_type, and amenities]')
+st.subheader(' ')
 
 #make a price query slider for test(will remove later)
 price_range = st.slider("Please choose your preferred price range",
