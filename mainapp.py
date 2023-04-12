@@ -40,3 +40,6 @@ import subprocess
 if st.button('Pull from git'):
     subprocess.run("git pull origin", shell=True)
     st.experimental_rerun()
+
+result = subprocess.run("git rev-parse HEAD", shell=True, capture_output=True, text=True)
+st.write('Latest github code id running on this server:', result.stdout)
