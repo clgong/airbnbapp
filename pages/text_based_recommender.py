@@ -132,14 +132,26 @@ def preprocess_text(text, stopwords = nltk_STOPWORDS, stem=False, lemma=False):
     text = ' '.join(text)
     return text
 
-# vectorize data live
+# non pickle vectorizer object
 @st.cache_data
 def vectorize_data(corpus):
-    # load tfidf vectorizer and do the transformation
-    tfidf_vectorizer = pd.read_pickle(("data/cleaned_v2/tfidf_vectorizer.pk"))
-    tfidf_matrix = tfidf_vectorizer.transform(corpus).todense()
-    tfidf_matrix = np.asarray(tfidf_matrix)
+    # TfidfVectorizer
+    tfidf_vectorizer = TfidfVectorizer(
+                                    ngram_range = (1,2),
+                                    stop_words='english')
+    # update: use todense() and np.asarray to avoid error in streamlit app
+    tfidf_matrix = tfidf_vectorizer.fit_transform(corpus)
+
     return tfidf_vectorizer, tfidf_matrix
+
+# vectorize data live, but with pickled vectorizer
+# @st.cache_data
+# def vectorize_data(corpus):
+#     # load tfidf vectorizer and do the transformation
+#     tfidf_vectorizer = pd.read_pickle(("data/cleaned_v2/tfidf_vectorizer.pk"))
+#     tfidf_matrix = tfidf_vectorizer.transform(corpus).todense()
+#     tfidf_matrix = np.asarray(tfidf_matrix)
+#     return tfidf_vectorizer, tfidf_matrix
 
 # vectorize data from pickle
 # @st.cache_data
@@ -158,7 +170,7 @@ tfidf_vectorizer, tfidf_matrix = vectorize_data(corpus)    # live
 
 # get similarity
 @st.cache_data
-def get_similarity(input_query, tfidf_matrix):
+def get_similarity(input_query, _tfidf_matrix):
     # embed input query
     tokens = preprocess_text(input_query,stopwords = nltk_STOPWORDS, stem=False, lemma=True).split()
     query_vector = tfidf_vectorizer.transform(tokens)
@@ -287,7 +299,7 @@ make_wordcloud(df_rec,'cleaned_content', selected_listing_id, wordcloud_STOPWORD
 ########################################################################################################
 # add rental review wordcloud #
 
-# generate review wordcloud 
+# generate review wordcloud
 st.header('Rental review word cloud')
 
 # Show name and URL of selected property
