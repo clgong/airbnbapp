@@ -600,3 +600,60 @@ st.write("\"{}\" - [{}]({})".format(recomended_listings_update.listing_name.toli
 
 # Draw the topic bar chart
 plot_listing_review_topics(review_df,'review_topic_interpreted', selected_listing_id)
+
+
+########################################################################################################
+# add rental review report #
+
+def get_review_sentiment_report(df,col,listing_id):
+    sorted_neg_sentences = np.nan
+    sorted_pos_sentences = np.nan
+    if listing_id in df['listing_id'].values:
+        comments = df[df['listing_id'] == listing_id]['comments'].values[0]
+        if len(comments) <=1:
+            st.write('Oops, this listing currently has no comments.')
+            return sorted_neg_sentences, sorted_pos_sentences
+        else:
+            # segement all comments into sentences for the given listing
+            review_sentences = df[df['listing_id'] == listing_id]['comments'].apply(lambda x: re.sub("(<.*?>)|([\t\r])","",x)).str.split('.').values.tolist()[0]
+            num_review_sentences = len(review_sentences)
+
+            # get polarity score of both the positives and negatives for each sentence in all the comments
+            neg_sentences = []
+            pos_sentences = []
+            # nutrual_comment = []
+            for i, text in enumerate(review_sentences):
+                score = SentimentIntensityAnalyzer().polarity_scores(text)['compound']
+                if score < 0:
+                    neg_sentences.append((score,review_sentences[i]))
+                elif score > 0:
+                    pos_sentences.append((score,review_sentences[i]))
+                else:
+                    pass
+
+            neg_percent = round(len(neg_sentences)/num_review_sentences*100,2)
+            pos_percent = round(len(pos_sentences)/num_review_sentences*100,2)
+            sorted_neg_sentences = [comment for score, comment in sorted(neg_sentences, key=lambda x: x[0])]
+            sorted_pos_sentences = [comment for score, comment in sorted(pos_sentences, key=lambda x: x[0])]
+            st.subheader("Overall:")
+            st.write("{}% of all the reviews sentences ({}/{}) on Airbnb for this listing are positive!".format(pos_percent, len(pos_sentences),num_review_sentences))
+            st.write("{}% of them ({}/{}) are negative.".format(neg_percent,len(neg_sentences),num_review_sentences))
+            # st.write('---------------')
+            st.subheader("Helpful negative sentences: ")
+
+            if len(sorted_neg_sentences) >0:
+                for i, sentence in enumerate(sorted_neg_sentences):
+                    st.write("{}: {}".format(i+1, sentence)) # need to yield every 3 items from a list
+            else:
+                st.write("Wow, this listing currently doesn't have any negative sentences!")
+        return sorted_neg_sentences, sorted_pos_sentences
+
+
+# generate review report for a recommended listing (has comments)
+st.header('Rental review report')
+
+# Show name and URL of selected property
+st.write("\"{}\" - [{}]({})".format(recomended_listings_update.listing_name.tolist()[index],link,link))
+
+# Draw the word cloud
+sorted_neg_sentences, sorted_pos_sentences = get_review_sentiment_report(df_rec,'comments',selected_listing_id)
