@@ -652,4 +652,4 @@ st.header('Rental review report')
 st.write("\"{}\" - [{}]({})".format(recomended_listings_update.listing_name.tolist()[index],link,link))
 
 # Draw the word cloud
-sorted_neg_sentences, sorted_pos_sentences = get_review_sentiment_report(df_rec,'comments',selected_listing_id)
+sorted_neg_sentences, sorted_pos_sentences = get_review_sentiment_report(df_filter,'comments',selected_listing_id)
