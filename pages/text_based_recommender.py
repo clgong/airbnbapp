@@ -2,14 +2,13 @@
 
 
 """
- UPDATE Apr 10: updated review report result
- 1.updated the review report output when there's empty comment
- 2. added narrative to review sentiment trends if no trend is shown
- 3. added 'number_of_reviews' col to the recommendation table
-
+ UPDATE Apr 11: fixed bugs and added review topic section
+ 1. added review topic section and fixed ploting bugs
+ 2. added cleaned_review_with_polarity_and_topic.zip file and replaced the cleaned_review_with_polarity.zip file with it
+ 3. did some text edits
 """
 
-## add some comment here for test 3
+## add some comment here for test 4
 
 # import libraries
 import streamlit as st
@@ -46,6 +45,10 @@ from nltk.stem import WordNetLemmatizer,PorterStemmer
 from nltk.corpus import stopwords
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 
+
+########################################################################################################
+# basic settings #
+
 # set pages
 st.set_page_config(
     page_title = 'Multippage App',
@@ -55,33 +58,30 @@ st.set_page_config(
 st.title('AirBnb Rentals in Seattle')
 st.write('Hello from team-spirit :)')
 st.write('Streamlit version: '+st.__version__)
-st.write('test april 8 xinqian')
 
 # header
 st.header('Try the customized recommender in UI')
 
-#make a price query slider
+#make a price query slider for test(will remove later)
 price_range = st.slider("Please choose your preferred price range",
                         value = [50,5000])
 st.write("Your preferred price range:", price_range)
 submit_price = st.button('Confirm')
 
-#make an input box
+# make an input box
 defult_input = "I want a private room close to uw campus with parking and coffee shop."
 input_query = st.text_input("Please describe the rental you're looking for here ",defult_input)
-submit = st.button('Submit')  ## submit buttion
+submit = st.button('Submit')
 
-
-# TODO: run the code below after click the submit button instead of running the code automatically
 ########################################################################################################
 # code to get top 5 recommendations #
 
-##### prepare stopword set
+# prepare stopword set
 added_stopwords = ["can't",'t', 'us', 'say','would', 'also','within','stay', 'since']
 nltk_STOPWORDS = set(stopwords.words("english"))
 nltk_STOPWORDS.update(added_stopwords)
 
-##### get data
+# get data
 @st.cache_data
 def get_data():
     # directly load the saved dataset
@@ -102,19 +102,13 @@ def get_data():
     # get final df
     df_rec = df.loc[:,[*listing_cols, *content_cols]]
     return df_rec
-
 df_rec = get_data()
-# st.write(df_rec.shape)
-# st.write(df_rec.head(2))
 
 # use filtered dataframe for test
 df_rec = df_rec.loc[(df_rec['price'] < price_range[1]) &(df_rec['price'] > price_range[0])]
-# df_filter_std = listing_trans.loc[listing_trans['listing_id'].isin(df_filter['listing_id'])]
 df_rec = df_rec.reset_index()
-# st.write(df_rec.shape)
-# st.write(df_rec.head(2))
 
-##### preprocess input query
+# preprocess input query
 @st.cache_data
 def preprocess_text(text, stopwords = nltk_STOPWORDS, stem=False, lemma=False):
     # clean the text
@@ -138,17 +132,16 @@ def preprocess_text(text, stopwords = nltk_STOPWORDS, stem=False, lemma=False):
     text = ' '.join(text)
     return text
 
-##### Vectorize data live
+# vectorize data live
 @st.cache_data
 def vectorize_data(corpus):
     # load tfidf vectorizer and do the transformation
     tfidf_vectorizer = pd.read_pickle(("data/cleaned_v2/tfidf_vectorizer.pk"))
     tfidf_matrix = tfidf_vectorizer.transform(corpus).todense()
     tfidf_matrix = np.asarray(tfidf_matrix)
-
     return tfidf_vectorizer, tfidf_matrix
 
-# ###### Vectorize data from pickle
+# vectorize data from pickle
 # @st.cache_data
 # def vectorize_data():
 #     # load tfidf vectorizer and do the transformation
@@ -156,7 +149,6 @@ def vectorize_data(corpus):
 #     tfidf_matrix = pd.read_pickle(("data/cleaned_v2/tfidf_matrix.pk"))
 #     # tfidf_matrix = tfidf_vectorizer.transform(corpus).todense()
 #     tfidf_matrix = np.asarray(tfidf_matrix)
-
 #     return tfidf_vectorizer, tfidf_matrix
 
 # get corpus
@@ -164,8 +156,7 @@ corpus = df_rec['content'].values
 tfidf_vectorizer, tfidf_matrix = vectorize_data(corpus)    # live
 # tfidf_vectorizer, tfidf_matrix = vectorize_data()    # from pickle
 
-
-##### get similarity
+# get similarity
 @st.cache_data
 def get_similarity(input_query, tfidf_matrix):
     # embed input query
@@ -174,13 +165,11 @@ def get_similarity(input_query, tfidf_matrix):
     # get similarity
     tfidf_matrix_sparse = sparse.csr_matrix(tfidf_matrix)
     similarity = cosine_similarity(query_vector, tfidf_matrix_sparse)
-
     return similarity
 
 similarity = get_similarity(input_query, tfidf_matrix)
-# st.write(similarity.shape)
 
-##### get recommendations
+# get recommendations
 @st.cache_data
 def get_recommendations(df,similarity, n=5):
 
@@ -201,7 +190,6 @@ def get_recommendations(df,similarity, n=5):
         mask = np.logical_or(cos_sim[index] != 0, mask) #eliminate 0 cosine distance
         best_index = index[mask][:top_n]
         return best_index
-
     # best cosine distance for each token independantly
     best_index = extract_best_indices(similarity, top_n=n)
 
@@ -220,20 +208,13 @@ recomended_listings = get_recommendations(df_rec, similarity, n=5)
 st.header('Top 5 recommended rentals')
 st.write(recomended_listings)
 
-
-################################################################
-##### add review sentiment plot for the recommended listings #####
-
-#### ISSUES TODO:  the wordcloud code only use the first recomendation as example
-# 1. change the trends legend labels from listing_id to recommendation_n for users!!
-
+########################################################################################################
+# add review sentiment plot for the recommended listings #
 
 @st.cache_data
 def get_review_data():
     # directly read the saved cleaned_review_with_polarity dataset
-    review_df = pd.read_pickle('data/cleaned_v2/cleaned_review_with_polarity.zip')
-    # print(review_df.shape)
-    # review_df.head(2)
+    review_df = pd.read_pickle('data/cleaned_v2/cleaned_review_with_polarity_and_topic.zip')
     return review_df
 review_df = get_review_data()
 
@@ -242,32 +223,24 @@ review_df = get_review_data()
 @st.cache_data
 def plot_listing_sentiment_over_time(df,listing_id = None):
     sub_df = df[df['listing_id'].isin(listing_id)]
-
     plot = alt.Chart(sub_df, width=500).mark_line().encode(
                 x='year(date):T',
                 y='mean(polarity)',
                 color=alt.Color('listing_id:O', scale=alt.Scale(scheme= 'dark2'))
             ).interactive()
-    return plot
-
-# plot the sentiment changes over time by year for the recommended listings
-rec_listing_ids = recomended_listings['listing_id'].values
-sentiment_plot = plot_listing_sentiment_over_time(review_df, rec_listing_ids)
+    st.altair_chart(plot, use_container_width=True)
 
 # write a note
 st.header('Rental review sentiment trends')
-st.write("(Note: no trending line if the rental doesn't have comment or it only have reviews in year 2022.)")
+st.write("(Note: the trendline will not be shown if the rental only has comments for 2022, and the listing_id will not be shown in the legend if the rental doesn't have any comments.)")
+
 # plot the figure
-st.altair_chart(sentiment_plot, use_container_width=True)
+rec_listing_ids = recomended_listings['listing_id'].values
+plot_listing_sentiment_over_time(review_df, rec_listing_ids)
 
+########################################################################################################
+# add rental description wordcloud #
 
-# ################################################################
-# # ##### add rental description wordcloud #####
-
-# #### TODO:
-# # how to run the code section one by one istead of starting from begainning when choosing different recommendation listing
-
-# UPDATE: April 8, fixed error wordcloud when there's no comment/description content
 @st.cache_data
 def make_wordcloud(df, col, listing_id, stop_words, mask=None):
 
@@ -295,10 +268,9 @@ def make_wordcloud(df, col, listing_id, stop_words, mask=None):
             else:
                 st.write('Oops, this listing currently has no descriptions.')
 
-# generate wordcloud for a recommended listing (has comments)
-st.header('Word cloud for rental description')
+# generate wordcloud for a recommended listing
+st.header('Rental description word cloud')
 st.subheader('Pick a top n recommendation for more info')
-wordcloud_STOPWORDS = STOPWORDS
 
 # get a top n listing id from the user
 selected_listing_id = st.selectbox("Choose listing id:", recomended_listings['listing_id'])
@@ -309,21 +281,14 @@ link = recomended_listings.listing_url.tolist()[index]
 st.write("\"{}\" - [{}]({})".format(recomended_listings.listing_name.tolist()[index],link,link))
 
 # Draw the word cloud
+wordcloud_STOPWORDS = STOPWORDS
 make_wordcloud(df_rec,'cleaned_content', selected_listing_id, wordcloud_STOPWORDS, mask=None)
 
-# # generate wordcloud using a button
-# ok = st.button("Make Wordcloud for the rental description")
-# if ok:
-#     with st.spinner('Making Wordcloud...'):
-#         make_wordcloud(df_rec,'cleaned_content', selected_listing_id, wordcloud_STOPWORDS, mask=None)
-#     st.success('Done!')
-
-
-###############################################################
-##### add rental review wordcloud #####
+########################################################################################################
+# add rental review wordcloud #
 
 # generate review wordcloud 
-st.header('Word cloud for rental reviews')
+st.header('Rental review word cloud')
 
 # Show name and URL of selected property
 st.write("\"{}\" - [{}]({})".format(recomended_listings.listing_name.tolist()[index],link,link))
@@ -331,15 +296,42 @@ st.write("\"{}\" - [{}]({})".format(recomended_listings.listing_name.tolist()[in
 # Draw the word cloud
 make_wordcloud(df_rec,'comments_nouns_adjs', selected_listing_id, wordcloud_STOPWORDS, mask=None)
 
+########################################################################################################
+##### add rental review topic bar chart #####
 
-################################################################
-##### add rental review report #####
+# make review topic bar chart
+@st.cache_data
+def plot_listing_review_topics(df, col, listing_id):
+
+    if listing_id in df['listing_id'].values:
+        sub_df = df[df['listing_id'] == listing_id]
+        plot = alt.Chart(sub_df).mark_bar().encode(
+                        y=alt.Y('review_topic_interpreted:O', sort='-x', axis=alt.Axis(labelLimit=200,labelFontSize=14)),
+                        x='count():Q',
+                        color=alt.Color('listing_id:O', scale=alt.Scale(scheme= 'dark2'))
+                    ).properties(
+                        width=400,
+                        height=300
+                    ).interactive()
+        st.altair_chart(plot, use_container_width=True)
+    else:
+        st.write("Oops, this listing currently has no comments.")
+
+# generate review report for a recommended listing (has comments)
+st.header('Rental review topics bar chart')
+
+# Show name and URL of selected property
+st.write("\"{}\" - [{}]({})".format(recomended_listings.listing_name.tolist()[index],link,link))
+
+# Draw the topic bar chart
+plot_listing_review_topics(review_df,'review_topic_interpreted', selected_listing_id)
+
+########################################################################################################
+# add rental review report #
 
 def get_review_sentiment_report(df,col,listing_id):
-
     sorted_neg_sentences = np.nan
     sorted_pos_sentences = np.nan
-
     if listing_id in df['listing_id'].values:
         comments = df[df['listing_id'] == listing_id]['comments'].values[0]
         if len(comments) <=1:
@@ -377,7 +369,7 @@ def get_review_sentiment_report(df,col,listing_id):
                 for i, sentence in enumerate(sorted_neg_sentences):
                     st.write("{}: {}".format(i+1, sentence)) # need to yield every 3 items from a list
             else:
-                st.write("Wow, this listing currently doesn't have any negative sentences!)")
+                st.write("Wow, this listing currently doesn't have any negative sentences!")
         return sorted_neg_sentences, sorted_pos_sentences
 
 
