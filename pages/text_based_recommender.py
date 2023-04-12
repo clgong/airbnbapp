@@ -2,7 +2,7 @@
 
 
 """
- UPDATE Apr 11: fixed bugs and added review topic section
+ UPDATE Apr 11: delete streamlit reference file
  1. added review topic section and fixed ploting bugs
  2. added cleaned_review_with_polarity_and_topic.zip file and replaced the cleaned_review_with_polarity.zip file with it
  3. did some text edits
