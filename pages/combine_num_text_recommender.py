@@ -91,7 +91,7 @@ nltk_STOPWORDS.update(added_stopwords)
 @st.cache_data
 def get_data():
     # directly load the saved dataset
-    df = pd.read_pickle('data/cleaned_v2/cleaned_listing_and_review_with_polarity_and_text_content.zip')
+    df = pd.read_pickle('data/cleaned_v2/cleaned_listing_finalized_for_streamlit.zip')
     # get date cols
     date_col = df.select_dtypes('datetime64[ns]').columns.to_list()
     # remove the following cols
@@ -127,7 +127,11 @@ def get_data():
                                                                 'listing_url',
                                                                 'listing_name',
                                                                 'content',
-                                                                'cleaned_content']
+                                                                'cleaned_content',
+                                                                'cluster',
+                                                                'similarity',
+                                                                'cleaned_comments',
+                                                                'comments_nouns_adjs']
     # get final df
     df_listing = df.loc[:,~df.columns.isin(removed_col)]
     return df_listing
