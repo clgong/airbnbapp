@@ -132,7 +132,7 @@ def preprocess_text(text, stopwords = nltk_STOPWORDS, stem=False, lemma=False):
     text = ' '.join(text)
     return text
 
-# non pickle vectorizer object
+# create document term matrix
 @st.cache_data
 def vectorize_data(corpus):
     # TfidfVectorizer
@@ -144,29 +144,9 @@ def vectorize_data(corpus):
 
     return tfidf_vectorizer, tfidf_matrix
 
-# vectorize data live, but with pickled vectorizer
-# @st.cache_data
-# def vectorize_data(corpus):
-#     # load tfidf vectorizer and do the transformation
-#     tfidf_vectorizer = pd.read_pickle(("data/cleaned_v2/tfidf_vectorizer.pk"))
-#     tfidf_matrix = tfidf_vectorizer.transform(corpus).todense()
-#     tfidf_matrix = np.asarray(tfidf_matrix)
-#     return tfidf_vectorizer, tfidf_matrix
-
-# vectorize data from pickle
-# @st.cache_data
-# def vectorize_data():
-#     # load tfidf vectorizer and do the transformation
-#     tfidf_vectorizer = pd.read_pickle(("data/cleaned_v2/tfidf_vectorizer.pk"))
-#     tfidf_matrix = pd.read_pickle(("data/cleaned_v2/tfidf_matrix.pk"))
-#     # tfidf_matrix = tfidf_vectorizer.transform(corpus).todense()
-#     tfidf_matrix = np.asarray(tfidf_matrix)
-#     return tfidf_vectorizer, tfidf_matrix
-
 # get corpus
 corpus = df_rec['content'].values
-tfidf_vectorizer, tfidf_matrix = vectorize_data(corpus)    # live
-# tfidf_vectorizer, tfidf_matrix = vectorize_data()    # from pickle
+tfidf_vectorizer, tfidf_matrix = vectorize_data(corpus)
 
 # get similarity
 @st.cache_data
