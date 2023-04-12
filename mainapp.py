@@ -34,6 +34,8 @@ st.set_page_config(
 st.title('AirBnb Rentals in Seattle')
 st.write('Hello from team-spirit :)')
 
+st.write('Streamlit version: '+st.__version__)
+
 
 # 1. Prepare data
 
@@ -105,13 +107,13 @@ df_model_num = df_model.select_dtypes(include=number_types)
 
 #df_model_num.head(5)
 
-st.write('Similarity matrix')
+#st.write('Similarity matrix')
 @st.cache_data
 def get_sim(df):
     return cosine_similarity(df)
 
 similarity = get_sim(df_model_num)
-similarity
+#similarity
 
 #similarity[500]
 
