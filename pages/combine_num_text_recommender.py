@@ -276,6 +276,8 @@ def vectorize_data(corpus):
 
     return tfidf_vectorizer, tfidf_matrix
 
+corpus = filter_df['content'].values
+tfidf_vectorizer, tmatrix = vectorize_data(corpus)
 
 ##### get similarity
 @st.cache_data
@@ -338,7 +340,7 @@ def get_text_recommendations(df, input_query, _tfidf_matrix, n=5):
 
 ## Try the recommender system
 
-def get_recommendation(df,input_query,n):
+def get_recommendation(df,input_query,_tfidf_matrix, n):
     if input_query == "":
         rec_df = df.loc[df['cluster']==major_cluster]
         select_listing_id = st.selectbox("Choose listing id:", rec_df['listing_id'])
@@ -346,16 +348,14 @@ def get_recommendation(df,input_query,n):
         recomended_listings = get_num_recommendations(rec_df, num_similarity, n, listing_id=select_listing_id)
         
     else:
-        # get corpus       
-        corpus = df['content'].values
-        tfidf_vectorizer, tmatrix = vectorize_data(corpus) 
+        # get corpus
         df = df.reset_index()
-        recomended_listings = get_text_recommendations(df, input_query, tmatrix, n)
+        recomended_listings = get_text_recommendations(df, input_query, _tfidf_matrix, n)
         
     return recomended_listings
 
 
-recomended_listings_update = get_recommendation(filter_df,input_query,5)
+recomended_listings_update = get_recommendation(filter_df,input_query,tmatrix, 5)
 st.write(recomended_listings_update)
 
 
