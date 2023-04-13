@@ -493,7 +493,6 @@ def get_text_recommendations(df, input_query, _tfidf_matrix, n=5):
 
 
 ## Try the recommender system
-@st.cache_data
 
 def get_recommendation(df,input_query,n):
     if input_query == "":
