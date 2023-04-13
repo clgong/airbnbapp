@@ -115,29 +115,34 @@ def get_data(price_range,num_of_beds,num_of_bedrooms,num_of_bathrooms):
 
 
 # make a price query slider
+st.subheader(":green[your query on prices]")
 price_range = st.slider("Please choose your preferred price range",
                         value = [50,5000])
 st.write("Your expected price range:", price_range)
 
 # make a num of beds slider
+st.subheader(":green[your query on the number of beds]")
 bed_range = range(0,16)
 num_of_beds = st.select_slider("Choose your preferred number of beds:",
                                options = bed_range, value = 10)
 st.write("Your expected number of beds:", num_of_beds)
 
 # make a num of bedrooms slider
+st.subheader(":green[your query on the number of bedrooms]")
 room_range = range(0,16)
 num_of_bedrooms = st.select_slider("Choose your preferred number of bedrooms:",
                                    options = room_range, value = 10)
 st.write("Your expected number of bedrooms:", num_of_bedrooms)
 
 # make a num of bathrooms slider
+st.subheader(":green[your query on the number of bathrooms]")
 bath_range = range(0,16)
 num_of_bathrooms = st.select_slider("Choose your preferred number of bathrooms:",
                                    options = bath_range, value = 10)
 st.write("Your expected number of bathrooms:", num_of_bathrooms)
 
 # make an input box
+st.subheader(":green[more queries by describing what else you are looking for]")
 defult_input = ""
 input_query = st.text_input("Please describe the rental you're looking for here ",defult_input)
 submit = st.button('Submit')
@@ -354,7 +359,7 @@ def get_recommendation(df,input_query,_tfidf_matrix, n):
         
     return recomended_listings
 
-
+st.header(":blue[Top recommendations]")
 recomended_listings_update = get_recommendation(filter_df,input_query,tmatrix, 5)
 st.write(recomended_listings_update)
 
