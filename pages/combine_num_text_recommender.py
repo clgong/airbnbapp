@@ -68,7 +68,7 @@ st.write('Streamlit version: 1.20.0')
 
 
 # header
-st.header('Try the customized recommender in UI')
+st.header('Try the recommender which combines the text and numeric features')
 
 
 #make a price query slider
@@ -511,7 +511,7 @@ def plot_listing_sentiment_over_time(df,listing_id = None):
 
 
 # write a note
-st.header('Rental review sentiment trends')
+st.header(":blue[Rental review sentiment trends]")
 st.write("(Note: the trendline will not be shown if the rental only has comments for 2022, and the listing_id will not be shown in the legend if the rental doesn't have any comments.)")
 
 # plot the sentiment changes over time by year for the recommended listings
@@ -551,7 +551,7 @@ def make_wordcloud(df, col, listing_id, stop_words, mask=None):
                 st.write('Oops, this listing currently has no descriptions.')
 
 # generate wordcloud for a recommended listing
-st.header('Rental description word cloud')
+st.header(":blue[Rental description] word cloud")
 st.subheader('Pick a top n recommendation for more info')
 
 # get a top n listing id from the user
@@ -565,6 +565,18 @@ st.write("\"{}\" - [{}]({})".format(recomended_listings_update.listing_name.toli
 # Draw the word cloud
 wordcloud_STOPWORDS = STOPWORDS
 make_wordcloud(df_filter,'cleaned_content', selected_listing_id, wordcloud_STOPWORDS, mask=None)
+
+########################################################################################################
+# add rental review wordcloud #
+
+# generate review wordcloud
+st.header(":blue[Rental review] word cloud")
+
+# Show name and URL of selected property
+st.write("\"{}\" - [{}]({})".format(recomended_listings_update.listing_name.tolist()[index],link,link))
+
+# Draw the word cloud
+make_wordcloud(df_filter,'comments_nouns_adjs', selected_listing_id, wordcloud_STOPWORDS, mask=None)
 
 
 ########################################################################################################
@@ -589,7 +601,7 @@ def plot_listing_review_topics(df, col, listing_id):
         st.write("Oops, this listing currently has no comments.")
 
 # generate review report for a recommended listing (has comments)
-st.header('Rental review topics bar chart')
+st.header(":blue[Rental review topics] bar chart")
 
 # Show name and URL of selected property
 st.write("\"{}\" - [{}]({})".format(recomended_listings_update.listing_name.tolist()[index],link,link))
@@ -646,7 +658,7 @@ def get_review_sentiment_report(df,col,listing_id):
 
 
 # generate review report for a recommended listing (has comments)
-st.header('Rental review report')
+st.header(":blue[Rental review report]")
 
 # Show name and URL of selected property
 st.write("\"{}\" - [{}]({})".format(recomended_listings_update.listing_name.tolist()[index],link,link))
