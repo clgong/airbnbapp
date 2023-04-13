@@ -136,7 +136,7 @@ st.write("Your expected number of bedrooms:", num_of_bedrooms)
 
 # make a num of bathrooms slider
 st.subheader(":green[your query on the number of bathrooms]")
-bath_range = range(0,16)
+bath_range = range(-1,16)
 num_of_bathrooms = st.select_slider("Choose your preferred number of bathrooms:",
                                    options = bath_range, value = 10)
 st.write("Your expected number of bathrooms:", num_of_bathrooms)
