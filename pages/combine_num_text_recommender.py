@@ -148,165 +148,9 @@ filter_df = get_data(price_range,num_of_beds,num_of_bedrooms,num_of_bathrooms)
 
 
 ########################################################################################################
-##### preprocess listing data for clustering
-@st.cache_data
-def get_transformed_data(df):
-    # get date cols
-    date_col = df.select_dtypes('datetime64[ns]').columns.to_list()
-    # remove the following cols
-    removed_col = ['host_id',
-                    'host_listings_count',
-                    'host_total_listings_count',
-                    'latitude',
-                    'longitude',
-                    'minimum_minimum_nights',
-                    'maximum_minimum_nights',
-                    'minimum_maximum_nights',
-                    'maximum_maximum_nights',
-                    'minimum_nights_avg_ntm',
-                    'maximum_nights_avg_ntm',
-                    'availability_30',
-                    'availability_60',
-                    'availability_90',
-                    'availability_365',
-                    'number_of_reviews_ltm',
-                    'number_of_reviews_l30d',
-                    'host_response_time_encoded'] + date_col + ['description',
-                                                                'neighborhood_overview',
-                                                                'picture_url',
-                                                                'host_url',
-                                                                'host_name',
-                                                                'host_location',
-                                                                'host_about',
-                                                                'host_picture_url',
-                                                                'host_neighbourhood',
-                                                                'comments',
-                                                                'host_verifications',
-                                                                'amenities',
-                                                                'listing_url',
-                                                                'listing_name',
-                                                                'content',
-                                                                'cleaned_content',
-                                                                'cluster',
-                                                                'similarity',
-                                                                'cleaned_comments',
-                                                                'comments_nouns_adjs']
-    # get final df
-    df_listing = df.loc[:,~df.columns.isin(removed_col)]
-    
-    # set listing id as the index
-    df_listing = df_listing.set_index('listing_id')
-    
-    # categorical columns in the dataframe
-    cat_col = df_listing.select_dtypes('object').columns
-    # convert host response time to categorical dtype
-    df_listing['host_response_time'] = df_listing['host_response_time'].astype('category')
-    # define order of the ordinal features
-    response_time_list = ['within an hour',
-                          'within a few hours',
-                          'within a day',
-                          'a few days or more',
-                          'no response']
-    # define nominal and ordinal features in the categorical columns
-    nom_cols = ['property_type','room_type','neighbourhood_cleansed','neighbourhood_group_cleansed']
-    ordinal_cols = df_listing.select_dtypes(['category']).columns
-
-    # define numeric transformation pipeline that scales the numbers
-    numeric_pipeline = Pipeline([('numnorm', StandardScaler())])
-
-    # define an ordinal transformation pipeline that ordinal encodes the cats
-    ordinal_pipeline = Pipeline([('ordinalenc', OrdinalEncoder(categories = [response_time_list]))])
-
-    # define a nominal transformation pipeline that OHE the cats
-    nominal_pipeline = Pipeline([('onehotenc', OneHotEncoder(categories= "auto",
-                                                             sparse = False,
-                                                             handle_unknown = 'ignore'))])
-
-    # construct column transformer for the selected columns with pipelines
-    ct = ColumnTransformer(transformers = [("nominalpipe", nominal_pipeline, nom_cols),
-                                           ("ordinalpipe", ordinal_pipeline, ['host_response_time']),
-                                           ("numericpipe", numeric_pipeline,
-                                           df_listing.select_dtypes(['int', 'float']).columns)])
-    # dataframe after data transformation
-    df_trans = pd.DataFrame(ct.fit_transform(df_listing))
-
-    # get nominal values
-    nominal_features = list(nominal_pipeline.named_steps['onehotenc'].fit(df[nom_cols]).get_feature_names_out())
-
-    # get ordinal values
-    ordinal_features = list(ordinal_cols)
-
-    # get numeric values
-    numeric_features = ['host_response_rate', 'host_acceptance_rate', 'host_is_superhost',
-                         'host_has_profile_pic', 'host_identity_verified', 'has_license',
-                         'instant_bookable','accommodates','bedrooms', 'beds',
-                         'bathrooms_count', 'amenities_count', 'price',
-                         'minimum_nights', 'maximum_nights','has_availability',
-                         'number_of_reviews', 'review_scores_rating',
-                         'review_scores_accuracy', 'review_scores_cleanliness',
-                         'review_scores_checkin', 'review_scores_communication',
-                         'review_scores_location', 'review_scores_value',
-                         'calculated_host_listings_count',
-                         'calculated_host_listings_count_entire_homes',
-                         'calculated_host_listings_count_private_rooms',
-                         'calculated_host_listings_count_shared_rooms', 'reviews_per_month',
-                         'host_operate_years', 'polarity']
-    # naming the columns of the transformed dataframe
-    df_trans.columns = nominal_features + ordinal_features + numeric_features
-
-    # handling the missing/infinity values
-    df_trans = df_trans.fillna(0)
-
-    return df_trans
-
-## dataframe after data transformation
-filter_trans = get_transformed_data(filter_df)
-
-
-########################################################################################################
-##### Kmeans to find the clusters
-@st.cache_data
-# initialize Kmeans and find clusters
-def kmeans_cluster(df):
-    kmeans_kwargs = {"init": "random",
-                     "n_init": 10,
-                     "max_iter": 300,
-                     "random_state": 42}
-
-    # A list holds the SSE values for each k
-    sse = []
-    for k in range(1, 11):
-        kmeans = KMeans(n_clusters = k, **kmeans_kwargs)
-        kmeans.fit(df)
-        sse.append(kmeans.inertia_)
-
-    kl = KneeLocator(range(1, 11), sse, curve="convex", direction="decreasing")
-
-    # we will use this result as the best number of clusters
-    K = kl.elbow
-
-    # initiate kmeans
-    kmeans = KMeans(n_clusters = K,
-                    init='k-means++',
-                    verbose=0,
-                    n_init=10,
-                    max_iter=300,
-                    random_state=42,
-                    algorithm='lloyd')
-
-    # predict the clusters
-    predict_cluster = kmeans.fit_predict(df)
-
-    return predict_cluster
-
-## add new clusters to the filtered dataset
-filter_df['new_cluster'] = list(kmeans_cluster(filter_trans))
-
-
-########################################################################################################
 ##### Cosine similarity
 
-major_cluster = filter_df['new_cluster'].value_counts().sort_values(ascending=False).index[0]
+major_cluster = filter_df['cluster'].value_counts().sort_values(ascending=False).index[0]
 cosine_similarity_col = ['host_response_rate', 'host_acceptance_rate',
        'host_is_superhost', 'host_has_profile_pic', 'host_identity_verified',
        'accommodates', 'bedrooms', 'beds', 'price', 'minimum_nights',
@@ -321,8 +165,8 @@ cosine_similarity_col = ['host_response_rate', 'host_acceptance_rate',
        'calculated_host_listings_count_shared_rooms', 'reviews_per_month',
        'bathrooms_count', 'amenities_count', 'host_operate_years', 'polarity']
 
-similarity_df = filter_df.loc[filter_df['new_cluster']==major_cluster][cosine_similarity_col]
-
+similarity_df = filter_df.loc[filter_df['cluster']==major_cluster][cosine_similarity_col]
+similarity_df = similarity_df.fillna(0)
 num_similarity = cosine_similarity(similarity_df)
 
 
@@ -331,7 +175,7 @@ num_similarity = cosine_similarity(similarity_df)
 
 model_columns_all = list(filter_df.columns.values)
 
-ui_display_columns = ['new_cluster', 
+ui_display_columns = ['cluster',
                       'listing_id',               
                       'listing_url',                                      
                       'listing_name',                                      
@@ -473,7 +317,7 @@ def get_text_recommendations(df, input_query, _tfidf_matrix, n=5):
 
     # return the top n similar listing ids and raw comments
     result_df = df.loc[best_index,:]
-    result_df = result_df.loc[:, ['new_cluster', 'listing_id',
+    result_df = result_df.loc[:, ['cluster', 'listing_id',
                                       'listing_url',
                                       'listing_name',
                                       'price',
@@ -496,7 +340,7 @@ def get_text_recommendations(df, input_query, _tfidf_matrix, n=5):
 
 def get_recommendation(df,input_query,n):
     if input_query == "":
-        rec_df = df.loc[df['new_cluster']==major_cluster]
+        rec_df = df.loc[df['cluster']==major_cluster]
         select_listing_id = st.selectbox("Choose listing id:", rec_df['listing_id'])
         index = rec_df['listing_id'].tolist().index(select_listing_id)
         recomended_listings = get_num_recommendations(rec_df, num_similarity, n, listing_id=select_listing_id)
