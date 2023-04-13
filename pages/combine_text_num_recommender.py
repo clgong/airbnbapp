@@ -1,3 +1,10 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[ ]:
+
+
+# %load combine_num_text_recommender.py
 
 """
 # My first app
@@ -54,8 +61,6 @@ from nltk.sentiment.vader import SentimentIntensityAnalyzer
 
 
 ########################################################################################################
-# basic settings #
-
 # set pages
 st.set_page_config(
     page_title = 'Multippage App',
@@ -71,32 +76,75 @@ st.write('Streamlit version: '+st.__version__)
 st.header('Try the recommender which combines the text and numeric features')
 
 
-#make a price query slider
+########################################################################################################
+##### filtering listing data 
+@st.cache_data
+def get_data(price_range,num_of_beds,num_of_bedrooms,num_of_bathrooms):
+    
+    df = pd.read_pickle('data/cleaned_v2/cleaned_listing_finalized_for_streamlit.zip')
+        
+    if len(df.loc[(df['price']>price_range[0])&(df['price']<=price_range[1])])!=0:
+        df_filter = df.loc[(df['price']>=price_range[0])&(df['price']<=price_range[1])]
+ 
+    else:
+        df_filter = df
+        st.write('There are no listings within your preferred price range.        \nYou can try a new price range, or ignore prices and query on other conditions.')
+        
+    if len(df_filter.loc[df_filter['beds']==num_of_beds])!=0:
+        df_filter = df_filter.loc[df_filter['beds']==num_of_beds]
+   
+    else:
+        df_filter = df_filter
+        st.write('There are no listings with {} beds.        \nYou can try a new number of beds, or ignore the number of beds and query on other conditions.'.format(num_of_beds))
+        
+    if len(df_filter.loc[df_filter['bedrooms']==num_of_bedrooms])!=0:
+        df_filter = df_filter.loc[df_filter['bedrooms']==num_of_bedrooms]
+      
+    else:
+        df_filter = df_filter
+        st.write('There are no listings with {} bedrooms.        \nYou can try a new number of bedrooms, or ignore the number of bedrooms and query on other conditions.'.format(num_of_bedrooms))
+        
+    if len(df_filter.loc[df_filter['bathrooms_count']==num_of_bathrooms])!=0:
+        df_filter = df_filter.loc[df_filter['bathrooms_count']==num_of_bathrooms]
+    
+    else:
+        df_filter = df_filter
+        st.write('There are no listings with {} bathrooms.        \nYou can try a new number of bathrooms, or ignore the number of bathrooms and query on other conditions.'.format(num_of_bathrooms))
+                    
+    return df_filter
+
+
+# make a price query slider
 price_range = st.slider("Please choose your preferred price range",
-                        value = [50,2000])
+                        value = [50,5000])
 st.write("Your expected price range:", price_range)
-submit_price = st.button('Confirm')
 
+# make a num of beds slider
+num_of_beds = st.select_slider("Choose your preferred number of beds:", value = np.linspace(0,15,num=16))
+st.write("Your expected number of beds:", num_of_beds)
 
-#make an input box
-defult_input = "I want a private room close to uw campus with parking and coffee shop."
+# make a num of bedrooms slider
+num_of_bedrooms = st.select_slider("Choose your preferred number of bedrooms:", value = np.linspace(0,15,num=16))
+st.write("Your expected number of bedrooms:", num_of_bedrooms)
+
+# make a num of bathrooms slider
+num_of_bathrooms = st.select_slider("Choose your preferred number of bathrooms:", value = np.linspace(-1,15,num=17))
+st.write("Your expected number of bathrooms:", num_of_bathrooms)
+
+# make an input box
+defult_input = ""
 input_query = st.text_input("Please describe the rental you're looking for here ",defult_input)
 submit = st.button('Submit')
 
 
+## dataframe with satisfying the filter queries
+filter_df = get_data(price_range,num_of_beds,num_of_bedrooms,num_of_bathrooms)
+
+
 ########################################################################################################
-# code to get top 5 recommendations #
-
-##### prepare stopword set
-added_stopwords = ["can't",'t', 'us', 'say','would', 'also','within','stay', 'since']
-nltk_STOPWORDS = set(stopwords.words("english"))
-nltk_STOPWORDS.update(added_stopwords)
-
-##### get data
+##### preprocess listing data for clustering
 @st.cache_data
-def get_data():
-    # directly load the saved dataset
-    df = pd.read_pickle('data/cleaned_v2/cleaned_listing_finalized_for_streamlit.zip')
+def get_transformed_data(df):
     # get date cols
     date_col = df.select_dtypes('datetime64[ns]').columns.to_list()
     # remove the following cols
@@ -139,21 +187,14 @@ def get_data():
                                                                 'comments_nouns_adjs']
     # get final df
     df_listing = df.loc[:,~df.columns.isin(removed_col)]
-    return df_listing
-
-##### dataframe with selected numeric and categorical features
-listing_df = get_data()
-
-
-##### preprocess listing data for clustering
-@st.cache_data
-def get_transformed_data(df):
+    
     # set listing id as the index
-    df = df.set_index('listing_id')
+    df_listing = df_listing.set_index('listing_id')
+    
     # categorical columns in the dataframe
-    cat_col = df.select_dtypes('object').columns
+    cat_col = df_listing.select_dtypes('object').columns
     # convert host response time to categorical dtype
-    df['host_response_time'] = df['host_response_time'].astype('category')
+    df_listing['host_response_time'] = df_listing['host_response_time'].astype('category')
     # define order of the ordinal features
     response_time_list = ['within an hour',
                           'within a few hours',
@@ -162,7 +203,7 @@ def get_transformed_data(df):
                           'no response']
     # define nominal and ordinal features in the categorical columns
     nom_cols = ['property_type','room_type','neighbourhood_cleansed','neighbourhood_group_cleansed']
-    ordinal_cols = df.select_dtypes(['category']).columns
+    ordinal_cols = df_listing.select_dtypes(['category']).columns
 
     # define numeric transformation pipeline that scales the numbers
     numeric_pipeline = Pipeline([('numnorm', StandardScaler())])
@@ -179,9 +220,9 @@ def get_transformed_data(df):
     ct = ColumnTransformer(transformers = [("nominalpipe", nominal_pipeline, nom_cols),
                                            ("ordinalpipe", ordinal_pipeline, ['host_response_time']),
                                            ("numericpipe", numeric_pipeline,
-                                           df.select_dtypes(['int', 'float']).columns)])
+                                           df_listing.select_dtypes(['int', 'float']).columns)])
     # dataframe after data transformation
-    df_trans = pd.DataFrame(ct.fit_transform(df))
+    df_trans = pd.DataFrame(ct.fit_transform(df_listing))
 
     # get nominal values
     nominal_features = list(nominal_pipeline.named_steps['onehotenc'].fit(df[nom_cols]).get_feature_names_out())
@@ -212,34 +253,12 @@ def get_transformed_data(df):
 
     return df_trans
 
-##### dataframe after data transformation
-listing_trans = get_transformed_data(listing_df)
+## dataframe after data transformation
+filter_trans = get_transformed_data(filter_df)
 
 
-##### get the cluster
-@st.cache_data
-# initialize and compute PCA, get the principle components
-def pca_component(df):
-    pca = PCA()
-    pca.fit_transform(df)
-
-    components = pca.components_
-
-    return components
-
-##### PCA factor loadings
-df_c = pd.DataFrame(pca_component(listing_trans), columns=list(listing_trans.columns)).T
-
-component_n = []
-for i in range(len(df_c)):
-    if df_c.iloc[:,0].sort_values(ascending=False)[:i].sum() > 0.9:
-        component_n.append(i)
-principle_component_lst = list(df_c.iloc[:,0].sort_values(ascending=False)[:component_n[0]].index)
-
-##### transformed dataframe after dimensionality reduction.
-pca_df = listing_trans[principle_component_lst]
-
-
+########################################################################################################
+##### Kmeans to find the clusters
 @st.cache_data
 # initialize Kmeans and find clusters
 def kmeans_cluster(df):
@@ -274,41 +293,101 @@ def kmeans_cluster(df):
 
     return predict_cluster
 
-# generate clusters
-pca_df['cluster'] = list(kmeans_cluster(pca_df))
-listing_df['cluster'] = list(pca_df['cluster'])
+## add clusters to the filtered dataset
+filter_df['new_cluster'] = list(kmeans_cluster(filter_trans))
 
 
-##### get data for recommendation
-raw_df = pd.read_pickle('data/cleaned_v2/cleaned_listing_finalized_for_streamlit.zip')
-new_col = ['listing_url', 'listing_name',
-           'description','neighborhood_overview',
-           'host_about', 'amenities', 'comments','cleaned_content','content','comments_nouns_adjs']
-listing_df[new_col] = raw_df[new_col].values
-listing_trans['listing_id'] = listing_df['listing_id']
-listing_trans['cluster'] = listing_df['cluster']
+########################################################################################################
+##### Cosine similarity
 
-numeric_features = ['host_response_rate', 'host_acceptance_rate', 'host_is_superhost',
-                     'host_has_profile_pic', 'host_identity_verified', 'has_license',
-                     'instant_bookable','accommodates','bedrooms', 'beds',
-                     'bathrooms_count', 'amenities_count', 'price',
-                     'minimum_nights', 'maximum_nights','has_availability',
-                     'number_of_reviews', 'review_scores_rating',
-                     'review_scores_accuracy', 'review_scores_cleanliness',
-                     'review_scores_checkin', 'review_scores_communication',
-                     'review_scores_location', 'review_scores_value',
-                     'calculated_host_listings_count',
-                     'calculated_host_listings_count_entire_homes',
-                     'calculated_host_listings_count_private_rooms',
-                     'calculated_host_listings_count_shared_rooms', 'reviews_per_month',
-                     'host_operate_years', 'polarity','cluster']
-similarity_df = listing_df[numeric_features].fillna(0)
+major_cluster = filter_df['new_cluster'].value_counts().sort_values(ascending=False).index[0]
+cosine_similarity_col = ['host_response_rate', 'host_acceptance_rate',
+       'host_is_superhost', 'host_has_profile_pic', 'host_identity_verified',
+       'accommodates', 'bedrooms', 'beds', 'price', 'minimum_nights',
+       'maximum_nights', 'has_availability', 'number_of_reviews',
+       'review_scores_rating', 'review_scores_accuracy',
+       'review_scores_cleanliness', 'review_scores_checkin',
+       'review_scores_communication', 'review_scores_location',
+       'review_scores_value', 'has_license', 'instant_bookable',
+       'calculated_host_listings_count',
+       'calculated_host_listings_count_entire_homes',
+       'calculated_host_listings_count_private_rooms',
+       'calculated_host_listings_count_shared_rooms', 'reviews_per_month',
+       'bathrooms_count', 'amenities_count', 'host_operate_years', 'polarity']
+
+similarity_df = filter_df.loc[filter_df['new_cluster']==major_cluster][cosine_similarity_col]
+
 num_similarity = cosine_similarity(similarity_df)
-listing_df.insert(loc=1,column='similarity',value=num_similarity[0])
 
-df_filter = listing_df.loc[(listing_df['price'] < price_range[1]) &(listing_df['price'] > price_range[0])]
-df_filter_std = listing_trans.loc[listing_trans['listing_id'].isin(df_filter['listing_id'])]
-df_filter = df_filter.reset_index()
+
+########################################################################################################
+##### build up num-based model
+
+model_columns_all = list(filter_df.columns.values)
+
+ui_display_columns = ['new_cluster', 
+                      'listing_id',               
+                      'listing_url',                                      
+                      'listing_name',                                      
+                      'price',                                      
+                      'description',                                      
+                      'room_type',                                      
+                      'property_type',                                      
+                      'neighborhood_overview',                                      
+                      'neighbourhood_cleansed',                                      
+                      'neighbourhood_group_cleansed',                                      
+                      'host_about',                                      
+                      'amenities',                                      
+                      'number_of_reviews','review_scores_rating']
+
+iloc_cols = [model_columns_all.index(x) for x in ui_display_columns]
+
+@st.cache_data
+def get_num_recommendations(df, similarity, n, listing_id=None, listing_url=None, query_element=None):
+
+    # convert query into and a similarity matrix row index
+    item_index = None
+    try:    
+        if listing_id is not None:
+            item_index = df['listing_id'].tolist().index(listing_id)
+        elif listing_url is not None:
+            item_index = df['listing_url'].tolist().index(listing_url)
+        elif query_element is not None:
+            item_index = query_element
+    except ValueError as error:
+        print(error)
+    
+    if len(item_index)>=5:
+        # get the top n similar items
+        top_idx = np.argsort(similarity[item_index])[::-1][:n]
+        result_df = df.iloc[top_idx, iloc_cols]
+        # add in similarity score as a column
+        top_scores = [similarity[item_index][x] for x in top_idx]
+        result_df.insert(loc=2, column='similarity', value=top_scores)
+        
+    else:
+        # get the top n similar items
+        top_idx = np.argsort(similarity[item_index])[::-1]
+        result_df = df.iloc[top_idx, iloc_cols]
+        # add in similarity score as a column
+        top_scores = [similarity[item_index][x] for x in top_idx]
+        result_df.insert(loc=2, column='similarity', value=top_scores)        
+        
+    result_df = result_df.reset_index().iloc[:,1:]
+    result_df.index = np.arange(1,len(result_df)+1)
+
+    return result_df
+
+
+
+########################################################################################################
+##### build up text-based model
+
+
+##### prepare stopword set
+added_stopwords = ["can't",'t', 'us', 'say','would', 'also','within','stay', 'since']
+nltk_STOPWORDS = set(stopwords.words("english"))
+nltk_STOPWORDS.update(added_stopwords)
 
 
 ##### preprocess input query
@@ -347,10 +426,6 @@ def vectorize_data(corpus):
 
     return tfidf_vectorizer, tfidf_matrix
 
-# get corpus
-corpus = df_filter['cleaned_content'].values
-tfidf_vectorizer, tmatrix = vectorize_data(corpus)
-# st.write(tfidf_matrix.shape)
 
 ##### get similarity
 @st.cache_data
@@ -378,7 +453,7 @@ def extract_best_indices(similarity, top_n, mask=None):
 
 ##### get recommendations
 @st.cache_data
-def get_recommendations(df, input_query, _tfidf_matrix, n=5):
+def get_text_recommendations(df, input_query, _tfidf_matrix, n=5):
 
     # embed input query
     tokens = preprocess_text(input_query,stopwords = nltk_STOPWORDS, stem=False, lemma=True).split()
@@ -392,7 +467,7 @@ def get_recommendations(df, input_query, _tfidf_matrix, n=5):
 
     # return the top n similar listing ids and raw comments
     result_df = df.loc[best_index,:]
-    result_df = result_df.loc[:, ['listing_id',
+    result_df = result_df.loc[:, ['new_cluster', 'listing_id',
                                       'listing_url',
                                       'listing_name',
                                       'price',
@@ -404,86 +479,35 @@ def get_recommendations(df, input_query, _tfidf_matrix, n=5):
                                       'neighbourhood_group_cleansed',
                                       'host_about',
                                       'amenities',
-                                      'number_of_reviews','review_scores_rating','cluster','similarity']].sort_values('similarity', ascending=False)
+                                      'number_of_reviews','review_scores_rating']]
+    result_df = result_df.reset_index().iloc[:,1:]
+    result_df.index = np.arange(1,len(result_df)+1)
 
     return result_df
 
 
-# Try the recommender system
-recomended_listings = get_recommendations(df_filter, input_query, tmatrix, n=5)
+## Try the recommender system
+@st.cache_data
 
-def update_recommend_listing(recomended_list, filtered_std_df, original_df, n):
-
-    if len(recomended_list['cluster'].value_counts()) > 1:
-        if len(recomended_list['cluster'].mode()) >= 1:
-            cluster_label = recomended_list['cluster'].mode().iloc[0]
-            listing_id = list(recomended_list.loc[recomended_list['cluster']==cluster_label]['listing_id'])
-            if len(filtered_std_df) >= n:
-                df_std_new = filtered_std_df.loc[(filtered_std_df['cluster']==cluster_label)&(listing_id not in filtered_std_df['listing_id'].to_list())]
-                df_d = pd.DataFrame(pca_component(df_std_new.iloc[:,:-3]), columns=list(df_std_new.iloc[:,:-3].columns)).T
-                new_id = df_std_new.sort_values(df_d.iloc[:,0].sort_values(ascending=False)[:1].index[0],
-                           ascending=False).head(n-len(listing_id))['listing_id']
-
-                updated_list = listing_id + list(new_id)
-
-                df_recommend = original_df.loc[original_df['listing_id']\
-                                           .isin(updated_list)]
-                df_recommend = df_recommend.sort_values('similarity',ascending=False)
-                df_recommend = df_recommend[['cluster','listing_id',
-                                             'listing_url',
-                                             'listing_name',
-                                             'price',
-                                             'description',
-                                             'room_type',
-                                             'property_type',
-                                                       'neighborhood_overview',
-                                                       'neighbourhood_cleansed',
-                                                       'neighbourhood_group_cleansed',
-                                                       'host_about',
-                                                       'amenities',
-                                                       'number_of_reviews',
-                                                       'review_scores_rating']]
-            else:
-                df_recommend = original_df.loc[(original_df['cluster']==cluster_label)]
-                df_recommend = df_recommend.sort_values('similarity',ascending=False)
-                df_recommend = df_recommend[['cluster','listing_id',
-                                              'listing_url',
-                                              'listing_name',
-                                              'price',
-                                              'description',
-                                              'room_type',
-                                              'property_type',
-                                              'neighborhood_overview',
-                                              'neighbourhood_cleansed',
-                                              'neighbourhood_group_cleansed',
-                                              'host_about',
-                                              'amenities',
-                                              'number_of_reviews',
-                                              'review_scores_rating']]
-
-    if len(recomended_list['cluster'].value_counts()) == 1:
-        df_recommend = recomended_list.loc[:, ['cluster','listing_id',
-                                               'listing_url',
-                                               'listing_name',
-                                               'price',
-                                               'description',
-                                               'room_type',
-                                               'property_type',
-                                               'neighborhood_overview',
-                                               'neighbourhood_cleansed',
-                                               'neighbourhood_group_cleansed',
-                                               'host_about',
-                                               'amenities',
-                                               'number_of_reviews','review_scores_rating']]
-    df_recommend = df_recommend.reset_index().iloc[:,1:]
-    df_recommend.index = np.arange(1,len(df_recommend)+1)
+def get_recommendation(df,input_query,n):
+    if input_query == "":
+        rec_df = df.loc[df['new_cluster']==major_cluster]
+        select_listing_id = st.selectbox("Choose listing id:", rec_df['listing_id'])
+        index = rec_df['listing_id'].tolist().index(select_listing_id)
+        recomended_listings = get_num_recommendations(rec_df, num_similarity, n, listing_id=select_listing_id)
+        
+    else:
+        # get corpus       
+        corpus = df['content'].values
+        tfidf_vectorizer, tmatrix = vectorize_data(corpus) 
+        df = df.reset_index()
+        recomended_listings = get_recommendations(df, input_query, tmatrix, n)
+        
+    return recomended_listings
 
 
-    return df_recommend
-
-# Try the combined recommender system
-recomended_listings_update = update_recommend_listing(recomended_listings, df_filter_std, df_filter, n=5)
-st.write(recomended_listings_update)
+recomended_listings_update = get_recommendation(filter_df,input_query,5)
+st.write(recomended_listings)
 
 
 ########################################################################################################
@@ -517,7 +541,6 @@ st.write("(Note: the trendline will not be shown if the rental only has comments
 # plot the sentiment changes over time by year for the recommended listings
 rec_listing_ids = recomended_listings_update['listing_id'].values
 sentiment_plot = plot_listing_sentiment_over_time(review_df, rec_listing_ids)
-
 
 
 ########################################################################################################
@@ -576,7 +599,7 @@ st.header(":blue[Rental review] word cloud")
 st.write("\"{}\" - [{}]({})".format(recomended_listings_update.listing_name.tolist()[index],link,link))
 
 # Draw the word cloud
-make_wordcloud(df_filter,'comments_nouns_adjs', selected_listing_id, wordcloud_STOPWORDS, mask=None)
+make_wordcloud(filter_df,'comments_nouns_adjs', selected_listing_id, wordcloud_STOPWORDS, mask=None)
 
 
 ########################################################################################################
@@ -664,4 +687,17 @@ st.header(""":blue[Rental review report]""")
 st.write("\"{}\" - [{}]({})".format(recomended_listings_update.listing_name.tolist()[index],link,link))
 
 # Draw the word cloud
-sorted_neg_sentences, sorted_pos_sentences = get_review_sentiment_report(df_filter,'comments',selected_listing_id)
+sorted_neg_sentences, sorted_pos_sentences = get_review_sentiment_report(filter_df,'comments',selected_listing_id)
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
