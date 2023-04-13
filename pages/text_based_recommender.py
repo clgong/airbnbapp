@@ -201,7 +201,7 @@ def get_recommendations(df,similarity, n=5):
 recomended_listings = get_recommendations(df_rec, similarity, n=5)
 
 st.header('Top 5 recommended rentals')
-st.write(recomended_listings.style.format(precision=2, thousands=''))
+st.write(recomended_listings)
 
 ########################################################################################################
 # add review sentiment plot for the recommended listings #
