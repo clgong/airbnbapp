@@ -658,7 +658,7 @@ def get_review_sentiment_report(df,col,listing_id):
 
 
 # generate review report for a recommended listing (has comments)
-st.header(":blue[Rental review report]")
+st.header(""":blue[Rental review report]""")
 
 # Show name and URL of selected property
 st.write("\"{}\" - [{}]({})".format(recomended_listings_update.listing_name.tolist()[index],link,link))
