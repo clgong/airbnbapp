@@ -363,7 +363,7 @@ def get_num_recommendations(df, similarity, n, listing_id=None, listing_url=None
     except ValueError as error:
         print(error)
     
-    if len(item_index)>=5:
+    if len(df)>=n:
         # get the top n similar items
         top_idx = np.argsort(similarity[item_index])[::-1][:n]
         result_df = df.iloc[top_idx, iloc_cols]
@@ -506,7 +506,7 @@ def get_recommendation(df,input_query,n):
         corpus = df['content'].values
         tfidf_vectorizer, tmatrix = vectorize_data(corpus) 
         df = df.reset_index()
-        recomended_listings = get_recommendations(df, input_query, tmatrix, n)
+        recomended_listings = get_text_recommendations(df, input_query, tmatrix, n)
         
     return recomended_listings
 
