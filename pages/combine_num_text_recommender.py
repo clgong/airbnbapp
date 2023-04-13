@@ -73,7 +73,7 @@ st.header('Try the recommender which combines the text and numeric features')
 
 #make a price query slider
 price_range = st.slider("Please choose your preferred price range",
-                        value = [50,2000])
+                        value = [50,5000])
 st.write("Your expected price range:", price_range)
 submit_price = st.button('Confirm')
 
