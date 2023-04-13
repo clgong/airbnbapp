@@ -356,7 +356,7 @@ def get_recommendation(df,input_query,n):
 
 
 recomended_listings_update = get_recommendation(filter_df,input_query,5)
-st.write(recomended_listings)
+st.write(recomended_listings_update)
 
 
 ########################################################################################################
