@@ -293,7 +293,7 @@ def kmeans_cluster(df):
 
     return predict_cluster
 
-## add clusters to the filtered dataset
+## add new clusters to the filtered dataset
 filter_df['new_cluster'] = list(kmeans_cluster(filter_trans))
 
 
