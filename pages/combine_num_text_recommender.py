@@ -436,7 +436,7 @@ st.write("\"{}\" - [{}]({})".format(recomended_listings_update.listing_name.toli
 
 # Draw the word cloud
 wordcloud_STOPWORDS = STOPWORDS
-make_wordcloud(df_filter,'cleaned_content', selected_listing_id, wordcloud_STOPWORDS, mask=None)
+make_wordcloud(filter_df,'cleaned_content', selected_listing_id, wordcloud_STOPWORDS, mask=None)
 
 ########################################################################################################
 # add rental review wordcloud #
