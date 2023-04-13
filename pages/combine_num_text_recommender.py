@@ -283,7 +283,7 @@ listing_df['cluster'] = list(pca_df['cluster'])
 raw_df = pd.read_pickle('data/cleaned_v2/cleaned_listing_finalized_for_streamlit.zip')
 new_col = ['listing_url', 'listing_name',
            'description','neighborhood_overview',
-           'host_about', 'amenities', 'comments','cleaned_content','content']
+           'host_about', 'amenities', 'comments','cleaned_content','content','comments_nouns_adjs']
 listing_df[new_col] = raw_df[new_col].values
 listing_trans['listing_id'] = listing_df['listing_id']
 listing_trans['cluster'] = listing_df['cluster']
