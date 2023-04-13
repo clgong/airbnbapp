@@ -690,14 +690,3 @@ st.write("\"{}\" - [{}]({})".format(recomended_listings_update.listing_name.toli
 sorted_neg_sentences, sorted_pos_sentences = get_review_sentiment_report(filter_df,'comments',selected_listing_id)
 
 
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
