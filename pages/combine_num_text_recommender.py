@@ -64,7 +64,7 @@ st.set_page_config(
 
 st.title('AirBnb Rentals in Seattle')
 st.write('Hello from team-spirit :)')
-st.write('Streamlit version: 1.20.0')
+st.write('Streamlit version: '+st.__version__)
 
 
 # header
