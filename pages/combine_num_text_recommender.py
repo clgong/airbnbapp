@@ -233,7 +233,7 @@ def get_num_recommendations(df, similarity, n, listing_id=None, listing_url=None
         result_df = df.iloc[top_idx, iloc_cols]
         # add in similarity score as a column
         top_scores = [similarity[item_index][x] for x in top_idx]
-        result_df.insert(loc=0, column='similarity', value=top_scores)        
+        result_df.insert(loc=0, column='similarity', value=top_scores)
         
     result_df = result_df.reset_index().iloc[:,1:]
     result_df.index = np.arange(1,len(result_df)+1)
