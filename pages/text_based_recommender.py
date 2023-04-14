@@ -2,10 +2,8 @@
 
 
 """
- UPDATE Apr 11: delete streamlit reference file
- 1. added review topic section and fixed ploting bugs
- 2. added cleaned_review_with_polarity_and_topic.zip file and replaced the cleaned_review_with_polarity.zip file with it
- 3. did some text edits
+ UPDATE Apr 13: added cols to recommender table
+ 1. added 'beds', 'bedrooms','bathrooms_count', cols
 """
 
 ## add some comment here for test 4
@@ -91,6 +89,7 @@ def get_data():
     df = pd.read_pickle('data/cleaned_v2/cleaned_listing_finalized_for_streamlit.zip')
     # select cols
     listing_cols = ['listing_id','listing_url','price',
+                    'beds', 'bedrooms','bathrooms_count',
                     'number_of_reviews','review_scores_rating', 'polarity',
                     'comments', 'comments_nouns_adjs']
     # get content cols
@@ -191,7 +190,7 @@ def get_recommendations(df,similarity, n=5):
     # return the top n similar listings
     result_df = df.loc[best_index,:]
     result_df = result_df.loc[:, ['listing_id', 'listing_url','listing_name', 'description',
-                                 'price','room_type','property_type',
+                                 'price','beds', 'bedrooms','bathrooms_count','room_type','property_type',
                                  'neighborhood_overview', 'neighbourhood_cleansed', 'neighbourhood_group_cleansed',
                                  'host_about', 'amenities', 'number_of_reviews', 'review_scores_rating']]
     result_df.reset_index(drop=True, inplace=True)
