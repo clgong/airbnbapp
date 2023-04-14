@@ -83,10 +83,6 @@ def get_data(price_range,num_of_beds,num_of_bedrooms,num_of_bathrooms):
     
     df = pd.read_pickle('data/cleaned_v2/cleaned_listing_finalized_for_streamlit.zip')
 
-    # make a price query slider
-    st.subheader(":green[your query on prices]")
-    price_range = st.slider("Please choose your preferred price range",
-                            value = [50,5000])
         
     if len(df.loc[(df['price']>price_range[0])&(df['price']<=price_range[1])])!=0:
         df_filter = df.loc[(df['price']>=price_range[0])&(df['price']<=price_range[1])]
@@ -96,15 +92,6 @@ def get_data(price_range,num_of_beds,num_of_bedrooms,num_of_bathrooms):
         df_filter = df
         st.write('There are no listings within your preferred price range.\nYou can try a new price range, or ignore prices and query on other conditions.')
 
-
-    # make a num of beds slider
-    st.subheader(":green[your query on the number of beds]")
-    st.write("(Note: If you choose 0, it means that you ignore this query.)")
-
-    bed_range = range(0,16)
-    num_of_beds = st.select_slider("Choose your preferred number of beds:",
-                                   options = bed_range, value = 1)
-
     if len(df_filter.loc[df_filter['beds']==num_of_beds])!=0:
         df_filter = df_filter.loc[df_filter['beds']==num_of_beds]
         st.write("Your expected number of beds:", num_of_beds)
@@ -113,12 +100,6 @@ def get_data(price_range,num_of_beds,num_of_bedrooms,num_of_bathrooms):
         df_filter = df_filter
         st.write('There are no listings with {} beds.\nYou can try a new number of beds, or ignore the number of beds and query on other conditions.'.format(num_of_beds))
 
-    # make a num of bedrooms slider
-    st.subheader(":green[your query on the number of bedrooms]")
-    st.write("(Note: If you choose 0, it means that you ignore this query.)")
-    room_range = range(0,16)
-    num_of_bedrooms = st.select_slider("Choose your preferred number of bedrooms:",
-                                       options = room_range, value = 1)
 
     if len(df_filter.loc[df_filter['bedrooms']==num_of_bedrooms])!=0:
         df_filter = df_filter.loc[df_filter['bedrooms']==num_of_bedrooms]
@@ -128,12 +109,6 @@ def get_data(price_range,num_of_beds,num_of_bedrooms,num_of_bathrooms):
         df_filter = df_filter
         st.write('There are no listings with {} bedrooms.\nYou can try a new number of bedrooms, or ignore the number of bedrooms and query on other conditions.'.format(num_of_bedrooms))
 
-    # make a num of bathrooms slider
-    st.subheader(":green[your query on the number of bathrooms]")
-    st.write("(Note: If you choose -1, it means that you ignore this query.)")
-    bath_range = range(-1,16)
-    num_of_bathrooms = st.select_slider("Choose your preferred number of bathrooms:",
-                                       options = bath_range, value = 1)
 
     if len(df_filter.loc[df_filter['bathrooms_count']==num_of_bathrooms])!=0:
         df_filter = df_filter.loc[df_filter['bathrooms_count']==num_of_bathrooms]
@@ -145,7 +120,31 @@ def get_data(price_range,num_of_beds,num_of_bedrooms,num_of_bathrooms):
                     
     return df_filter
 
+# make a price query slider
+st.subheader(":green[your query on prices]")
+price_range = st.slider("Please choose your preferred price range",
+                        value = [50,5000])
 
+# make a num of beds slider
+st.subheader(":green[your query on the number of beds]")
+st.write("(Note: If you choose 0, it means that you ignore this query.)")
+bed_range = range(0,16)
+num_of_beds = st.select_slider("Choose your preferred number of beds:",
+                               options = bed_range, value = 1)
+
+# make a num of bedrooms slider
+st.subheader(":green[your query on the number of bedrooms]")
+st.write("(Note: If you choose 0, it means that you ignore this query.)")
+room_range = range(0,16)
+num_of_bedrooms = st.select_slider("Choose your preferred number of bedrooms:",
+                                   options = room_range, value = 1)
+
+# make a num of bathrooms slider
+st.subheader(":green[your query on the number of bathrooms]")
+st.write("(Note: If you choose -1, it means that you ignore this query.)")
+bath_range = range(-1,16)
+num_of_bathrooms = st.select_slider("Choose your preferred number of bathrooms:",
+                                   options = bath_range, value = 1)
 
 # make an input box
 st.subheader(":green[more queries by describing what else you are looking for]")
