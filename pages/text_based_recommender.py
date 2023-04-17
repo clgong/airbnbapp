@@ -357,7 +357,6 @@ def get_review_sentiment_report(df,col,listing_id):
             if len(sorted_neg_sentences) >0:
                 for i, sentence in enumerate(sorted_neg_sentences):
                     st.write("{}: {}".format(i+1, sentence)) 
-                    st.write('')
             else:
                 st.write("Wow, this listing currently doesn't have any negative sentences!")
         return sorted_neg_sentences
