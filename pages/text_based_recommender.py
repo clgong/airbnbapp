@@ -4,7 +4,7 @@
 """
  UPDATE Apr 16: updated rental review report part
  1. changed the calculation for getting the negative polarity score
- 2. added colors to the outlook 
+ 2. added colors to the outlook
 """
 
 ## add some comment here for test 4
@@ -54,8 +54,6 @@ st.set_page_config(
 )
 
 st.title('AirBnb Rentals in Seattle')
-st.write('Hello from team-spirit :)')
-st.write('Streamlit version: '+st.__version__)
 
 # header
 st.header(':blue[Try the text based recommender]')
@@ -356,7 +354,7 @@ def get_review_sentiment_report(df,col,listing_id):
 
             if len(sorted_neg_sentences) >0:
                 for i, sentence in enumerate(sorted_neg_sentences):
-                    st.write("{}: {}".format(i+1, sentence)) 
+                    st.write("{}: {}".format(i+1, sentence))
             else:
                 st.write("Wow, this listing currently doesn't have any negative sentences!")
         return sorted_neg_sentences
