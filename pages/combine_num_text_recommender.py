@@ -67,27 +67,24 @@ st.set_page_config(
     page_icon='👋'
 )
 
-
 st.title('AirBnb Rentals in Seattle')
-st.write('Hello from team-spirit :)')
-st.write('Streamlit version: '+st.__version__)
 
 
 # header
 st.header('Try the recommender which combines the text and numeric features')
 
 ########################################################################################################
-##### filtering listing data 
+##### filtering listing data
 @st.cache_data
 def get_data(price_range,num_of_beds,num_of_bedrooms,num_of_bathrooms):
-    
+
     df = pd.read_pickle('data/cleaned_v2/cleaned_listing_finalized_for_streamlit.zip')
 
-        
+
     if len(df.loc[(df['price']>price_range[0])&(df['price']<=price_range[1])])!=0:
         df_filter = df.loc[(df['price']>=price_range[0])&(df['price']<=price_range[1])]
         st.write("Your expected price range:", price_range)
- 
+
     else:
         df_filter = df
         st.write('There are no listings within your preferred price range.\nYou can try a new price range, or ignore prices and query on other conditions.')
@@ -95,7 +92,7 @@ def get_data(price_range,num_of_beds,num_of_bedrooms,num_of_bathrooms):
     if len(df_filter.loc[df_filter['beds']==num_of_beds])!=0:
         df_filter = df_filter.loc[df_filter['beds']==num_of_beds]
         st.write("Your expected number of beds:", num_of_beds)
-   
+
     else:
         df_filter = df_filter
         st.write('There are no listings with {} beds.\nYou can try a new number of beds, or ignore the number of beds and query on other conditions.'.format(num_of_beds))
@@ -104,7 +101,7 @@ def get_data(price_range,num_of_beds,num_of_bedrooms,num_of_bathrooms):
     if len(df_filter.loc[df_filter['bedrooms']==num_of_bedrooms])!=0:
         df_filter = df_filter.loc[df_filter['bedrooms']==num_of_bedrooms]
         st.write("Your expected number of bedrooms:", num_of_bedrooms)
-      
+
     else:
         df_filter = df_filter
         st.write('There are no listings with {} bedrooms.\nYou can try a new number of bedrooms, or ignore the number of bedrooms and query on other conditions.'.format(num_of_bedrooms))
@@ -113,11 +110,11 @@ def get_data(price_range,num_of_beds,num_of_bedrooms,num_of_bathrooms):
     if len(df_filter.loc[df_filter['bathrooms_count']==num_of_bathrooms])!=0:
         df_filter = df_filter.loc[df_filter['bathrooms_count']==num_of_bathrooms]
         st.write("Your expected number of bathrooms:", num_of_bathrooms)
-    
+
     else:
         df_filter = df_filter
         st.write('There are no listings with {} bathrooms.\nYou can try a new number of bathrooms, or ignore the number of bathrooms and query on other conditions.'.format(num_of_bathrooms))
-                    
+
     return df_filter
 
 # make a price query slider
@@ -186,20 +183,20 @@ num_similarity = cosine_similarity(similarity_df)
 model_columns_all = list(filter_df.columns.values)
 
 ui_display_columns = ['cluster',
-                      'listing_id',               
-                      'listing_url',                                      
-                      'listing_name',                                      
+                      'listing_id',
+                      'listing_url',
+                      'listing_name',
                       'price',
                       'beds',
                       'bedrooms',
                       'bathrooms_count',
-                      'description',                                      
-                      'room_type',                                      
-                      'property_type',                                      
-                      'neighborhood_overview',                                      
-                      'neighbourhood_cleansed',                                      
+                      'description',
+                      'room_type',
+                      'property_type',
+                      'neighborhood_overview',
+                      'neighbourhood_cleansed',
                       'neighbourhood_group_cleansed',
-                      'amenities',                                      
+                      'amenities',
                       'number_of_reviews','review_scores_rating','host_about']
 
 iloc_cols = [model_columns_all.index(x) for x in ui_display_columns]
@@ -209,7 +206,7 @@ def get_num_recommendations(df, similarity, n, listing_id=None, listing_url=None
 
     # convert query into and a similarity matrix row index
     item_index = None
-    try:    
+    try:
         if listing_id is not None:
             item_index = df['listing_id'].tolist().index(listing_id)
         elif listing_url is not None:
@@ -218,7 +215,7 @@ def get_num_recommendations(df, similarity, n, listing_id=None, listing_url=None
             item_index = query_element
     except ValueError as error:
         print(error)
-    
+
     if len(df)>=n:
         # get the top n similar items
         top_idx = np.argsort(similarity[item_index])[::-1][:n]
@@ -226,7 +223,7 @@ def get_num_recommendations(df, similarity, n, listing_id=None, listing_url=None
         # add in similarity score as a column
         top_scores = [similarity[item_index][x] for x in top_idx]
         result_df.insert(loc=2, column='similarity', value=top_scores)
-        
+
     else:
         # get the top n similar items
         top_idx = np.argsort(similarity[item_index])[::-1]
@@ -234,7 +231,7 @@ def get_num_recommendations(df, similarity, n, listing_id=None, listing_url=None
         # add in similarity score as a column
         top_scores = [similarity[item_index][x] for x in top_idx]
         result_df.insert(loc=0, column='similarity', value=top_scores)
-        
+
     result_df = result_df.reset_index().iloc[:,1:]
     result_df.index = np.arange(1,len(result_df)+1)
 
@@ -362,12 +359,12 @@ def get_recommendation(df,input_query,_tfidf_matrix, n):
         select_listing_id = st.selectbox("Choose listing id:", rec_df['listing_id'])
         index = rec_df['listing_id'].tolist().index(select_listing_id)
         recomended_listings = get_num_recommendations(rec_df, num_similarity, n, listing_id=select_listing_id)
-        
+
     else:
         # get corpus
         df = df.reset_index()
         recomended_listings = get_text_recommendations(df, input_query, _tfidf_matrix, n)
-        
+
     return recomended_listings
 
 st.header(":blue[Top recommendations]")
@@ -552,5 +549,3 @@ st.write("\"{}\" - [{}]({})".format(recomended_listings_update.listing_name.toli
 
 # Draw the word cloud
 sorted_neg_sentences, sorted_pos_sentences = get_review_sentiment_report(filter_df,'comments',selected_listing_id)
-
-
