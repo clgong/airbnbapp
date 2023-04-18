@@ -2,9 +2,9 @@
 
 
 """
- UPDATE Apr 16: updated rental review report part
- 1. changed the calculation for getting the negative polarity score
- 2. added colors to the outlook 
+ UPDATE Apr 17: fixed error in filtered dataset
+ 1. fixed error when getting recommendations on filtered data
+ 2. improved app outlook
 """
 
 ## add some comment here for test 4
@@ -61,31 +61,16 @@ st.write('Streamlit version: '+st.__version__)
 st.header(':blue[Try the text based recommender]')
 st.caption('(Note: This recommender only uses the text from the fields: listing_name, description, host_name, host_location, host_about, host_response_time, host_neighbourhood, host_verifications, neighbourhood_cleansed, neighbourhood_group_cleansed, neighborhood_overview, property_type, room_type, and amenities)')
 
-#make a price query slider for test(will remove later)
-price_range = st.slider("Please choose your preferred price range",
-                        value = [50,5000])
-st.write("Your preferred price range:", price_range)
-submit_price = st.button('Confirm')
+##########################################################################################################
+# prepare data #
 
-# make an input box
-defult_input = "I want a private room close to uw campus with parking and coffee shop."
-input_query = st.text_input("Please describe the rental you're looking for here ",defult_input)
-submit = st.button('Submit')
-
-########################################################################################################
-# code to get top 5 recommendations #
-
-# prepare stopword set
-added_stopwords = ["can't",'t', 'us', 'say','would', 'also','within','stay', 'since']
-nltk_STOPWORDS = set(stopwords.words("english"))
-nltk_STOPWORDS.update(added_stopwords)
-
-# get data
+# get price-filterred listing data
 @st.cache_data
-def get_data():
+def get_data(price_range):
+
     # directly load the saved dataset
     df = pd.read_pickle('data/cleaned_v2/cleaned_listing_finalized_for_streamlit.zip')
-    # select cols
+    # # select cols
     listing_cols = ['listing_id','listing_url','price',
                     'beds', 'bedrooms','bathrooms_count',
                     'number_of_reviews','review_scores_rating', 'polarity',
@@ -99,14 +84,37 @@ def get_data():
                     'property_type', 'room_type','amenities',
                     'content','cleaned_content'
                    ]
-    # get final df
-    df_rec = df.loc[:,[*listing_cols, *content_cols]]
-    return df_rec
-df_rec = get_data()
+    df = df.loc[:,[*listing_cols, *content_cols]]
 
-# use filtered dataframe for test
-df_rec = df_rec.loc[(df_rec['price'] < price_range[1]) &(df_rec['price'] > price_range[0])]
-df_rec = df_rec.reset_index()
+    # filter df by price range
+    if len(df.loc[(df['price']>price_range[0])&(df['price']<=price_range[1])])!=0:
+        df_filter = df.loc[(df['price']>=price_range[0])&(df['price']<=price_range[1])]
+    else:
+        df_filter = df
+        st.write('There are no listings within your preferred price range.\nYou can try a new price range, or have default price range (50-5000).')
+    return df_filter
+
+# make a price query slider
+st.write(":green[Choose your preferred price range]")
+st.caption("(Note: Default price range is (50,5000), without changing, all recommendations will be based on your plain text input query.)")
+price_range = st.slider(" ",value = [50,5000])
+st.write("Your default price range:", price_range)
+
+# make an input box
+st.subheader(":green[Describe the rental you're looking for]")
+defult_input = "I want a private room close to uw campus with parking and coffee shop."
+input_query = st.text_input(" ",defult_input)
+submit = st.button('Submit')
+
+## get final filtered dataframe 
+df_rec = get_data(price_range)
+
+##########################################################################################################
+# code to get top 5 recommendations #
+# prepare stopword set
+added_stopwords = ["can't",'t', 'us', 'say','would', 'also','within','stay', 'since']
+nltk_STOPWORDS = set(stopwords.words("english"))
+nltk_STOPWORDS.update(added_stopwords)
 
 # preprocess input query
 @st.cache_data
@@ -132,56 +140,57 @@ def preprocess_text(text, stopwords = nltk_STOPWORDS, stem=False, lemma=False):
     text = ' '.join(text)
     return text
 
-# create document term matrix
+# Vectorize data
 @st.cache_data
 def vectorize_data(corpus):
     # TfidfVectorizer
     tfidf_vectorizer = TfidfVectorizer(
                                     ngram_range = (1,2),
                                     stop_words='english')
-    # update: use todense() and np.asarray to avoid error in streamlit app
     tfidf_matrix = tfidf_vectorizer.fit_transform(corpus)
-
     return tfidf_vectorizer, tfidf_matrix
 
 # get corpus
 corpus = df_rec['content'].values
 tfidf_vectorizer, tfidf_matrix = vectorize_data(corpus)
 
-# get similarity
+# extract best similarity indices
 @st.cache_data
-def get_similarity(input_query, _tfidf_matrix):
+def extract_best_indices(similarity, top_n, mask=None):
+    """
+    Use sum of the cosine distance over all tokens ans return best mathes.
+    m (np.array): cos matrix of shape (nb_in_tokens, nb_dict_tokens)
+    topk (int): number of indices to return (from high to lowest in order)
+    """
+    # return the sum on all tokens of consine for the input query
+    if len(similarity.shape) > 1:
+        cos_sim = np.mean(similarity, axis=0)
+    else:
+        cos_sim = similarity
+    index = np.argsort(cos_sim)[::-1]
+
+    if mask is not None:
+        assert mask.shape == similarity.shape
+        mask = mask[index]
+    else:
+        mask = np.ones(len(cos_sim))
+    mask = np.logical_or(cos_sim[index] != 0, mask) #eliminate 0 cosine distance
+    best_index = index[mask][:top_n]
+    return best_index
+
+# get recommendations
+@st.cache_data
+def get_recommendations(df,input_query, _tfidf_matrix, n=5):
+    # reset df index to avoid no-index error 
+    df = df.reset_index()
     # embed input query
     tokens = preprocess_text(input_query,stopwords = nltk_STOPWORDS, stem=False, lemma=True).split()
     query_vector = tfidf_vectorizer.transform(tokens)
     # get similarity
-    tfidf_matrix_sparse = sparse.csr_matrix(tfidf_matrix)
+    tfidf_matrix_sparse = sparse.csr_matrix(_tfidf_matrix)
     similarity = cosine_similarity(query_vector, tfidf_matrix_sparse)
-    return similarity
+    # similarity = cosine_similarity(query_vector, _tfidf_matrix)
 
-similarity = get_similarity(input_query, tfidf_matrix)
-
-# get recommendations
-@st.cache_data
-def get_recommendations(df,similarity, n=5):
-
-    def extract_best_indices(similarity, top_n, mask=None):
-        """
-        Use sum of the cosine distance over all tokens ans return best mathes.
-        m (np.array): cos matrix of shape (nb_in_tokens, nb_dict_tokens)
-        topk (int): number of indices to return (from high to lowest in order)
-        """
-        # return the sum on all tokens of consine for the input query
-        if len(similarity.shape) > 1:
-            cos_sim = np.mean(similarity, axis=0)
-        else:
-            cos_sim = similarity
-        index = np.argsort(cos_sim)[::-1]
-
-        mask = np.ones(len(cos_sim))
-        mask = np.logical_or(cos_sim[index] != 0, mask) #eliminate 0 cosine distance
-        best_index = index[mask][:top_n]
-        return best_index
     # best cosine distance for each token independantly
     best_index = extract_best_indices(similarity, top_n=n)
 
@@ -191,17 +200,19 @@ def get_recommendations(df,similarity, n=5):
                                  'price','beds', 'bedrooms','bathrooms_count','room_type','property_type',
                                  'neighborhood_overview', 'neighbourhood_cleansed', 'neighbourhood_group_cleansed',
                                  'host_about', 'amenities', 'number_of_reviews', 'review_scores_rating']]
-    result_df.reset_index(drop=True, inplace=True)
+    result_df = result_df.reset_index().iloc[:,1:]
+    result_df.index = np.arange(1,len(result_df)+1)
+
     return result_df
 
 # Try the recommender system
-recomended_listings = get_recommendations(df_rec, similarity, n=5)
+recomended_listings = get_recommendations(df_rec, input_query, tfidf_matrix, n=5)
 
 st.header(':blue[Top 5 recommended rentals]')
 st.write(recomended_listings)
 
 ########################################################################################################
-# add review sentiment plot for the recommended listings #
+# add rental review sentiment trends plot for the recommended listing #
 
 @st.cache_data
 def get_review_data():
@@ -263,6 +274,7 @@ def make_wordcloud(df, col, listing_id, stop_words, mask=None):
 # generate wordcloud for a recommended listing
 st.header(':blue[Rental description word cloud]')
 st.subheader(':green[Pick a top n recommendation for more info]')
+st.caption("(The order of listing ids listed is consistent with the order of recommended results returned. \nThat is: the first listing id is the first recommended listing, and the second listing id is the second recommended rental, and so on.)")
 
 # get a top n listing id from the user
 selected_listing_id = st.selectbox("Choose listing id:", recomended_listings['listing_id'])
@@ -319,7 +331,7 @@ st.write("\"{}\" - [{}]({})".format(recomended_listings.listing_name.tolist()[in
 plot_listing_review_topics(review_df,'review_topic_interpreted', selected_listing_id)
 
 ########################################################################################################
-# add rental review report #
+# add rental review report (negative review sentences) #
 @st.cache_data
 def get_review_sentiment_report(df,col,listing_id):
     sorted_neg_sentences = np.nan
