@@ -1,7 +1,9 @@
 
 final_proj_env/
 vtest1/
+.ipynb_checkpoints/
+.idea/
 .DS_Store
+
 # security
 *.pem
-
