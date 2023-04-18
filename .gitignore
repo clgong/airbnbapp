@@ -1,6 +1,7 @@
 
 final_proj_env/
 vtest1/
+venv/
 .ipynb_checkpoints/
 .idea/
 .DS_Store
