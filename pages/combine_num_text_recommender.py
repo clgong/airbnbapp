@@ -11,7 +11,6 @@
 Here's our first attempt at using data to create a table:
 """
 
-## add some comment here for test 2
 
 # import libraries
 import streamlit as st
@@ -68,7 +67,6 @@ st.set_page_config(
 )
 
 st.title('AirBnb Rentals in Seattle')
-
 
 # header
 st.header('Try the recommender which combines the text and numeric features')
@@ -543,7 +541,7 @@ def get_review_sentiment_report(df,col,listing_id):
 
             st.subheader(":green[Overall:]")
             st.write("{}% of all the reviews sentences ({}/{}) on Airbnb for this listing are not negative!".format(round(non_neg_percent*100,2), num_review_sentences-len(neg_sentences),num_review_sentences))
-            st.write("{}% of them ({}/{}) are negative.".format(round(neg_percent*100,2),len(neg_sentences),num_review_sentences))
+            st.write("{}% of them ({}/{}) are estimated to be negative review sentences.".format(round(neg_percent*100,2),len(neg_sentences),num_review_sentences))
 
             st.subheader(":green[Potentially helpful negative review sentences:]")
             st.caption("(Note: some of the negative review sentences might not sound negative to you due to the prediction algorithm used in our model. However, those review sentences are already the most negative ones in all the comments about this rental.)")
@@ -552,7 +550,7 @@ def get_review_sentiment_report(df,col,listing_id):
                 for i, sentence in enumerate(sorted_neg_sentences):
                     st.write("{}: {}".format(i+1, sentence))
             else:
-                st.write("Wow, this listing currently doesn't have any negative sentences!")
+                st.write("Wow, this listing currently doesn't have any estimated negative sentences!")
         return sorted_neg_sentences
 
 
