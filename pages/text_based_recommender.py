@@ -2,9 +2,9 @@
 
 
 """
- UPDATE Apr 17: fixed error in filtered dataset
- 1. fixed error when getting recommendations on filtered data
- 2. improved app outlook
+ UPDATE Apr 17: fixed no graph in sentiment trends plot 
+ 1. added info if no data after price setting. if no data in a price range, system will use all data to return recommendation
+ 2. changed the legend of sentiemnt trends to be readable
 """
 
 
@@ -90,7 +90,7 @@ def get_data(price_range):
         df_filter = df.loc[(df['price']>=price_range[0])&(df['price']<=price_range[1])]
     else:
         df_filter = df
-        st.write('There are no listings within your preferred price range.\nYou can try a new price range, or have default price range (50-5000).')
+        st.info('There are no listings within your preferred price range.\n Recommendations will be made purely based on your input query and rental text description(or try a new price range instead).')
     return df_filter
 
 # make a price query slider
@@ -224,17 +224,31 @@ review_df = get_review_data()
 # notice: altair can only take <=5000 rows, so cannot show all listings at once
 @st.cache_data
 def plot_listing_sentiment_over_time(df,listing_id = None):
+    # prepare dataframe
     sub_df = df[df['listing_id'].isin(listing_id)]
-    plot = alt.Chart(sub_df, width=500).mark_line().encode(
-                x='year(date):T',
-                y='mean(polarity)',
-                color=alt.Color('listing_id:O', scale=alt.Scale(scheme= 'dark2'))
-            ).interactive()
-    st.altair_chart(plot, use_container_width=True)
+    # map recommended rentals to listing_id
+    dict_map = dict(zip(listing_id,['1st_rec','2nd_rec','3rd_rec','4th_rec','5th_rec'])) 
+    sub_df['recommended_listings'] = sub_df['listing_id'].map(dict_map)
+
+    if sub_df.shape[0] != 0:
+        base = alt.Chart(sub_df).encode(
+            x='year(date):T',
+            y='mean(polarity)',
+            color=alt.Color('recommended_listings:O', scale=alt.Scale(scheme= 'dark2')))
+
+        plot = alt.layer(base.mark_line() + base.mark_circle(size=100)
+                        ).properties(
+                            width = 500,
+                            height= 350,
+                         ).interactive()
+
+        st.altair_chart(plot, use_container_width=True)
+    else:
+        st.info("Oops, there is no relevant review data (before Dec 24, 2022), then no graph to show here.")
 
 # write a note
 st.header(':blue[Rental review sentiment trends]')
-st.caption("(Note: the trendline will not be shown if the rental only has comments for 2022, and the listing_id will not be shown in the legend if the rental doesn't have any comments.)")
+st.caption("(Note: No graph to show if the rental doesn't have any comments.)")
 
 # plot the figure
 rec_listing_ids = recomended_listings['listing_id'].values
@@ -266,14 +280,14 @@ def make_wordcloud(df, col, listing_id, stop_words, mask=None):
             st.pyplot(fig)
         else:
             if 'comment' in col:
-                st.write('Oops, this listing currently has no comments.')
+                st.info('Oops, this listing currently has no comments.')
             else:
-                st.write('Oops, this listing currently has no descriptions.')
+                st.info('Oops, this listing currently has no descriptions.')
 
 # generate wordcloud for a recommended listing
 st.header(':blue[Rental description word cloud]')
 st.subheader(':green[Pick a top n recommendation for more info]')
-st.caption("(The order of listing ids listed is consistent with the order of recommended results returned. \nThat is: the first listing id is the first recommended listing, and the second listing id is the second recommended rental, and so on.)")
+st.caption("(Note: the first listing id is the first recommended listing (the most relevant), and the second listing id is the second recommended rental, and so on.)")
 
 # get a top n listing id from the user
 selected_listing_id = st.selectbox("Choose listing id:", recomended_listings['listing_id'])
@@ -318,7 +332,7 @@ def plot_listing_review_topics(df, col, listing_id):
                     ).interactive()
         st.altair_chart(plot, use_container_width=True)
     else:
-        st.write("Oops, this listing currently has no comments.")
+        st.info("Oops, this listing currently has no comments.")
 
 # generate review report for a recommended listing (has comments)
 st.header(':blue[Rental review topics bar chart]')
@@ -337,7 +351,7 @@ def get_review_sentiment_report(df,col,listing_id):
     if listing_id in df['listing_id'].values:
         comments = df[df['listing_id'] == listing_id]['comments'].values[0]
         if len(comments) <=1:
-            st.write('Oops, this listing currently has no comments.')
+            st.info('Oops, this listing currently has no comments.')
         else:
             # segement all comments into sentences for the given listing
             review_sentences = df[df['listing_id'] == listing_id]['comments'].apply(lambda x: re.sub("(<.*?>)|([\t\r])","",x)).str.split('[.?!]').values.tolist()[0]
