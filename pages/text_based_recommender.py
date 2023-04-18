@@ -2,13 +2,9 @@
 
 
 """
- UPDATE Apr 17: fixed no graph in sentiment trends plot 
- 1. added info if no data after price setting. if no data in a price range, system will use all data to return recommendation
- 2. changed the legend of sentiemnt trends to be readable
+ UPDATE Apr 18: corrected typos 
+
 """
-
-
-## add some comment here for test 4
 
 # import libraries
 import streamlit as st
@@ -285,7 +281,7 @@ def make_wordcloud(df, col, listing_id, stop_words, mask=None):
                 st.info('Oops, this listing currently has no descriptions.')
 
 # generate wordcloud for a recommended listing
-st.header(':blue[Rental description word cloud]')
+st.header(':blue[Rental description WordCloud]')
 st.subheader(':green[Pick a top n recommendation for more info]')
 st.caption("(Note: the first listing id is the first recommended listing (the most relevant), and the second listing id is the second recommended rental, and so on.)")
 
@@ -305,7 +301,7 @@ make_wordcloud(df_rec,'cleaned_content', selected_listing_id, wordcloud_STOPWORD
 # add rental review wordcloud #
 
 # generate review wordcloud
-st.header(':blue[Rental review word cloud]')
+st.header(':blue[Rental review WordCloud]')
 
 # Show name and URL of selected property
 st.write("\"{}\" - [{}]({})".format(recomended_listings.listing_name.tolist()[index],link,link))
@@ -335,7 +331,7 @@ def plot_listing_review_topics(df, col, listing_id):
         st.info("Oops, this listing currently has no comments.")
 
 # generate review report for a recommended listing (has comments)
-st.header(':blue[Rental review topics bar chart]')
+st.header(':blue[Rental review topics BarChart]')
 
 # Show name and URL of selected property
 st.write("\"{}\" - [{}]({})".format(recomended_listings.listing_name.tolist()[index],link,link))
@@ -394,5 +390,5 @@ st.header(':blue[Rental review report]')
 # Show name and URL of selected property
 st.write("\"{}\" - [{}]({})".format(recomended_listings.listing_name.tolist()[index],link,link))
 
-# Draw the word cloud
+# Return the report
 sorted_neg_sentences = get_review_sentiment_report(df_rec,'comments',selected_listing_id)
