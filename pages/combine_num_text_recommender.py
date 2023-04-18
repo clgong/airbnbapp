@@ -79,6 +79,8 @@ st.header('Try the recommender which combines the text and numeric features')
 def get_data(price_range,num_of_beds,num_of_bedrooms,num_of_bathrooms):
 
     df = pd.read_pickle('data/cleaned_v2/cleaned_listing_finalized_for_streamlit.zip')
+    df_cluster = pd.read_pickle('data/cleaned_v2/update_cluster.zip')
+    df['cluster'] = df_cluster['cluster']
 
 
     if len(df.loc[(df['price']>price_range[0])&(df['price']<=price_range[1])])!=0:
