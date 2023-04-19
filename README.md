@@ -10,7 +10,8 @@ However reading through every review in a large number of listings can be very t
 
 ## General logic of the recommender system
 
-![app_architecture](https://user-images.githubusercontent.com/101086582/232890030-75571f55-5260-48b6-90d8-86591fab7b80.png)
+![recommender_flow](https://user-images.githubusercontent.com/101086582/232954098-2e5e8e8c-b689-42e8-a01f-8ea70500e03a.png)
+
 
   
 ## Web app screen shot
