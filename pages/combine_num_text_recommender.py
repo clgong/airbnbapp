@@ -11,7 +11,6 @@
 Here's our first attempt at using data to create a table:
 """
 
-## add some comment here for test 2
 
 # import libraries
 import streamlit as st
@@ -67,29 +66,25 @@ st.set_page_config(
     page_icon='👋'
 )
 
-
 st.title('AirBnb Rentals in Seattle')
-st.write('Hello from team-spirit :)')
-st.write('Streamlit version: '+st.__version__)
-
 
 # header
 st.header('Try the recommender which combines the text and numeric features')
 
 ########################################################################################################
-##### filtering listing data 
+##### filtering listing data
 @st.cache_data
 def get_data(price_range,num_of_beds,num_of_bedrooms,num_of_bathrooms):
-    
-    df = pd.read_pickle('data/cleaned_v2/cleaned_listing_finalized_for_streamlit.zip')
-    df_cluster = pd.read_pickle('data/cleaned_v2/update_cluster.zip')
+
+    df = pd.read_pickle('data/data_cleaned/cleaned_listing_finalized_for_streamlit.zip')
+    df_cluster = pd.read_pickle('data/data_cleaned/update_cluster.zip')
     df['cluster'] = df_cluster['cluster']
 
-        
+
     if len(df.loc[(df['price']>price_range[0])&(df['price']<=price_range[1])])!=0:
         df_filter = df.loc[(df['price']>=price_range[0])&(df['price']<=price_range[1])]
         st.write("Your expected price range:", price_range)
- 
+
     else:
         df_filter = df
         st.write('There are no listings within your preferred price range.\nYou can try a new price range, or ignore prices and query on other conditions.')
@@ -97,7 +92,7 @@ def get_data(price_range,num_of_beds,num_of_bedrooms,num_of_bathrooms):
     if len(df_filter.loc[df_filter['beds']==num_of_beds])!=0:
         df_filter = df_filter.loc[df_filter['beds']==num_of_beds]
         st.write("Your expected number of beds:", num_of_beds)
-   
+
     else:
         df_filter = df_filter
         st.write('There are no listings with {} beds.\nYou can try a new number of beds, or ignore the number of beds and query on other conditions.'.format(num_of_beds))
@@ -106,7 +101,7 @@ def get_data(price_range,num_of_beds,num_of_bedrooms,num_of_bathrooms):
     if len(df_filter.loc[df_filter['bedrooms']==num_of_bedrooms])!=0:
         df_filter = df_filter.loc[df_filter['bedrooms']==num_of_bedrooms]
         st.write("Your expected number of bedrooms:", num_of_bedrooms)
-      
+
     else:
         df_filter = df_filter
         st.write('There are no listings with {} bedrooms.\nYou can try a new number of bedrooms, or ignore the number of bedrooms and query on other conditions.'.format(num_of_bedrooms))
@@ -115,11 +110,11 @@ def get_data(price_range,num_of_beds,num_of_bedrooms,num_of_bathrooms):
     if len(df_filter.loc[df_filter['bathrooms_count']==num_of_bathrooms])!=0:
         df_filter = df_filter.loc[df_filter['bathrooms_count']==num_of_bathrooms]
         st.write("Your expected number of bathrooms:", num_of_bathrooms)
-    
+
     else:
         df_filter = df_filter
         st.write('There are no listings with {} bathrooms.\nYou can try a new number of bathrooms, or ignore the number of bathrooms and query on other conditions.'.format(num_of_bathrooms))
-                    
+
     return df_filter
 
 # make a price query slider
@@ -188,20 +183,20 @@ num_similarity = cosine_similarity(similarity_df)
 model_columns_all = list(filter_df.columns.values)
 
 ui_display_columns = ['cluster',
-                      'listing_id',               
-                      'listing_url',                                      
-                      'listing_name',                                      
+                      'listing_id',
+                      'listing_url',
+                      'listing_name',
                       'price',
                       'beds',
                       'bedrooms',
                       'bathrooms_count',
-                      'description',                                      
-                      'room_type',                                      
-                      'property_type',                                      
-                      'neighborhood_overview',                                      
-                      'neighbourhood_cleansed',                                      
+                      'description',
+                      'room_type',
+                      'property_type',
+                      'neighborhood_overview',
+                      'neighbourhood_cleansed',
                       'neighbourhood_group_cleansed',
-                      'amenities',                                      
+                      'amenities',
                       'number_of_reviews','review_scores_rating','host_about']
 
 iloc_cols = [model_columns_all.index(x) for x in ui_display_columns]
@@ -211,7 +206,7 @@ def get_num_recommendations(df, similarity, n, listing_id=None, listing_url=None
 
     # convert query into and a similarity matrix row index
     item_index = None
-    try:    
+    try:
         if listing_id is not None:
             item_index = df['listing_id'].tolist().index(listing_id)
         elif listing_url is not None:
@@ -220,7 +215,7 @@ def get_num_recommendations(df, similarity, n, listing_id=None, listing_url=None
             item_index = query_element
     except ValueError as error:
         print(error)
-    
+
     if len(df)>=n:
         # get the top n similar items
         top_idx = np.argsort(similarity[item_index])[::-1][:n]
@@ -228,7 +223,7 @@ def get_num_recommendations(df, similarity, n, listing_id=None, listing_url=None
         # add in similarity score as a column
         top_scores = [similarity[item_index][x] for x in top_idx]
         result_df.insert(loc=2, column='similarity', value=top_scores)
-        
+
     else:
         # get the top n similar items
         top_idx = np.argsort(similarity[item_index])[::-1]
@@ -236,7 +231,7 @@ def get_num_recommendations(df, similarity, n, listing_id=None, listing_url=None
         # add in similarity score as a column
         top_scores = [similarity[item_index][x] for x in top_idx]
         result_df.insert(loc=0, column='similarity', value=top_scores)
-        
+
     result_df = result_df.reset_index().iloc[:,1:]
     result_df.index = np.arange(1,len(result_df)+1)
 
@@ -364,12 +359,11 @@ def get_recommendation(df,input_query,_tfidf_matrix, n):
         select_listing_id_ = st.selectbox("Choose listing id:", rec_df['listing_id'])
         index = rec_df['listing_id'].tolist().index(select_listing_id_)
         recomended_listings = get_num_recommendations(rec_df, num_similarity, n, listing_id=select_listing_id_)
-        
     else:
         # get corpus
         df = df.reset_index()
         recomended_listings = get_text_recommendations(df, input_query, _tfidf_matrix, n)
-        
+
     return recomended_listings
 
 st.header(":blue[Top recommendations]")
@@ -378,12 +372,12 @@ st.write(recomended_listings_update)
 
 
 ########################################################################################################
-# add review sentiment plot for the recommended listings #
+# add rental review sentiment trends plot for the recommended listing #
 
 @st.cache_data
 def get_review_data():
     # directly read the saved cleaned_review_with_polarity_and_topic dataset
-    review_df = pd.read_pickle('data/cleaned_v2/cleaned_review_with_polarity_and_topic.zip')
+    review_df = pd.read_pickle('data/data_cleaned/cleaned_review_with_polarity_and_topic.zip')
     return review_df
 review_df = get_review_data()
 
@@ -391,22 +385,36 @@ review_df = get_review_data()
 # notice: altair can only take <=5000 rows, so cannot show all listings at once
 @st.cache_data
 def plot_listing_sentiment_over_time(df,listing_id = None):
+    # prepare dataframe
     sub_df = df[df['listing_id'].isin(listing_id)]
-    plot = alt.Chart(sub_df, width=500).mark_line().encode(
-                x='year(date):T',
-                y='mean(polarity)',
-                color=alt.Color('listing_id:O', scale=alt.Scale(scheme= 'dark2'))
-            ).interactive()
-    st.altair_chart(plot, use_container_width=True)
+    # map recommended rentals to listing_id
+    dict_map = dict(zip(listing_id,['1st_rec','2nd_rec','3rd_rec','4th_rec','5th_rec'])) 
+    sub_df['recommended_listings'] = sub_df['listing_id'].map(dict_map)
+
+    if sub_df.shape[0] != 0:
+        base = alt.Chart(sub_df).encode(
+            x='year(date):T',
+            y='mean(polarity)',
+            color=alt.Color('recommended_listings:O', scale=alt.Scale(scheme= 'dark2')))
+
+        plot = alt.layer(base.mark_line() + base.mark_circle(size=100)
+                        ).properties(
+                            width = 500,
+                            height= 350,
+                         ).interactive()
+
+        st.altair_chart(plot, use_container_width=True)
+    else:
+        st.info("Oops, there is no relevant review data (before Dec 24, 2022), then no graph to show here.")
 
 
 # write a note
-st.header(":blue[Rental review sentiment trends]")
-st.write("(Note: the trendline will not be shown if the rental only has comments for 2022, and the listing_id will not be shown in the legend if the rental doesn't have any comments.)")
+st.header(':blue[Rental review sentiment trends]')
+st.caption("(Note: No graph to show if the rental doesn't have any comments.)")
 
-# plot the sentiment changes over time by year for the recommended listings
+# plot the figure
 rec_listing_ids = recomended_listings_update['listing_id'].values
-sentiment_plot = plot_listing_sentiment_over_time(review_df, rec_listing_ids)
+plot_listing_sentiment_over_time(review_df, rec_listing_ids)
 
 
 ########################################################################################################
@@ -435,13 +443,14 @@ def make_wordcloud(df, col, listing_id, stop_words, mask=None):
             st.pyplot(fig)
         else:
             if 'comment' in col:
-                st.write('Oops, this listing currently has no comments.')
+                st.info('Oops, this listing currently has no comments.')
             else:
-                st.write('Oops, this listing currently has no descriptions.')
+                st.info('Oops, this listing currently has no descriptions.')
 
 # generate wordcloud for a recommended listing
-st.header(":blue[Rental description] word cloud")
-st.subheader('Pick a top n recommendation for more info')
+st.header(':blue[Rental description WordCloud]')
+st.subheader(':green[Pick a top n recommendation for more info]')
+st.caption("(Note: the first listing id is the first recommended listing (the most relevant), and the second listing id is the second recommended rental, and so on.)")
 
 # get a top n listing id from the user
 selected_listing_id = st.selectbox("Choose wanted listing id:", recomended_listings_update['listing_id'])
@@ -459,7 +468,7 @@ make_wordcloud(filter_df,'cleaned_content', selected_listing_id, wordcloud_STOPW
 # add rental review wordcloud #
 
 # generate review wordcloud
-st.header(":blue[Rental review] word cloud")
+st.header(':blue[Rental review WordCloud]')
 
 # Show name and URL of selected property
 st.write("\"{}\" - [{}]({})".format(recomended_listings_update.listing_name.tolist()[index],link,link))
@@ -487,10 +496,10 @@ def plot_listing_review_topics(df, col, listing_id):
                     ).interactive()
         st.altair_chart(plot, use_container_width=True)
     else:
-        st.write("Oops, this listing currently has no comments.")
+        st.info("Oops, this listing currently has no comments.")
 
 # generate review report for a recommended listing (has comments)
-st.header(":blue[Rental review topics] bar chart")
+st.header(':blue[Rental review topics BarChart]')
 
 # Show name and URL of selected property
 st.write("\"{}\" - [{}]({})".format(recomended_listings_update.listing_name.tolist()[index],link,link))
@@ -500,59 +509,55 @@ plot_listing_review_topics(review_df,'review_topic_interpreted', selected_listin
 
 
 ########################################################################################################
-# add rental review report #
+# add rental review report (negative review sentences) #
 
+@st.cache_data
 def get_review_sentiment_report(df,col,listing_id):
     sorted_neg_sentences = np.nan
-    sorted_pos_sentences = np.nan
     if listing_id in df['listing_id'].values:
         comments = df[df['listing_id'] == listing_id]['comments'].values[0]
         if len(comments) <=1:
-            st.write('Oops, this listing currently has no comments.')
-            return sorted_neg_sentences, sorted_pos_sentences
+            st.info('Oops, this listing currently has no comments.')
         else:
             # segement all comments into sentences for the given listing
-            review_sentences = df[df['listing_id'] == listing_id]['comments'].apply(lambda x: re.sub("(<.*?>)|([\t\r])","",x)).str.split('.').values.tolist()[0]
+            review_sentences = df[df['listing_id'] == listing_id]['comments'].apply(lambda x: re.sub("(<.*?>)|([\t\r])","",x)).str.split('[.?!]').values.tolist()[0]
+            review_sentences = [sentence for sentence in review_sentences if sentence]
             num_review_sentences = len(review_sentences)
 
-            # get polarity score of both the positives and negatives for each sentence in all the comments
+            # get polarity score for the positives sentences in all the comments
             neg_sentences = []
-            pos_sentences = []
-            # nutrual_comment = []
             for i, text in enumerate(review_sentences):
-                score = SentimentIntensityAnalyzer().polarity_scores(text)['compound']
-                if score < 0:
-                    neg_sentences.append((score,review_sentences[i]))
-                elif score > 0:
-                    pos_sentences.append((score,review_sentences[i]))
+                sid_obj = SentimentIntensityAnalyzer().polarity_scores(text)
+                if (sid_obj['neg'] > 0.2) & (sid_obj['compound'] < -0.1):
+                    neg_sentences.append((sid_obj['compound'],sid_obj['neg'],review_sentences[i]))
                 else:
                     pass
 
-            neg_percent = round(len(neg_sentences)/num_review_sentences*100,2)
-            pos_percent = round(len(pos_sentences)/num_review_sentences*100,2)
-            sorted_neg_sentences = [comment for score, comment in sorted(neg_sentences, key=lambda x: x[0])]
-            sorted_pos_sentences = [comment for score, comment in sorted(pos_sentences, key=lambda x: x[0])]
-            st.subheader("Overall:")
-            st.write("{}% of all the reviews sentences ({}/{}) on Airbnb for this listing are positive!".format(pos_percent, len(pos_sentences),num_review_sentences))
-            st.write("{}% of them ({}/{}) are negative.".format(neg_percent,len(neg_sentences),num_review_sentences))
-            # st.write('---------------')
-            st.subheader("Helpful negative sentences: ")
+            neg_percent = (len(neg_sentences)/num_review_sentences)
+            non_neg_percent = 1-neg_percent
+            # sort the negative sentences first by 'compund' score (ascending order) then by 'neg' score (descending order)
+            sorted_neg_sentences = [comment for score1, score2, comment in sorted(neg_sentences, key=lambda x: (x[0], -x[1]))]
+
+            st.subheader(":green[Overall:]")
+            st.write("{}% of all the reviews sentences ({}/{}) on Airbnb for this listing are not negative!".format(round(non_neg_percent*100,2), num_review_sentences-len(neg_sentences),num_review_sentences))
+            st.write("{}% of them ({}/{}) are estimated to be negative review sentences.".format(round(neg_percent*100,2),len(neg_sentences),num_review_sentences))
+
+            st.subheader(":green[Potentially helpful negative review sentences:]")
+            st.caption("(Note: some of the negative review sentences might not sound negative to you due to the prediction algorithm used in our model. However, those review sentences are already the most negative ones in all the comments about this rental.)")
 
             if len(sorted_neg_sentences) >0:
                 for i, sentence in enumerate(sorted_neg_sentences):
-                    st.write("{}: {}".format(i+1, sentence)) # need to yield every 3 items from a list
+                    st.write("{}: {}".format(i+1, sentence))
             else:
-                st.write("Wow, this listing currently doesn't have any negative sentences!")
-        return sorted_neg_sentences, sorted_pos_sentences
+                st.write("Wow, this listing currently doesn't have any estimated negative sentences!")
+        return sorted_neg_sentences
 
 
 # generate review report for a recommended listing (has comments)
-st.header(""":blue[Rental review report]""")
+st.header(':blue[Rental review report]')
 
 # Show name and URL of selected property
 st.write("\"{}\" - [{}]({})".format(recomended_listings_update.listing_name.tolist()[index],link,link))
 
-# Draw the word cloud
-sorted_neg_sentences, sorted_pos_sentences = get_review_sentiment_report(filter_df,'comments',selected_listing_id)
-
-
+# Return the report
+sorted_neg_sentences = get_review_sentiment_report(filter_df,'comments',selected_listing_id)
