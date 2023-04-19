@@ -356,10 +356,9 @@ def get_text_recommendations(df, input_query, _tfidf_matrix, n=5):
 def get_recommendation(df,input_query,_tfidf_matrix, n):
     if input_query == "":
         rec_df = df.loc[df['cluster']==major_cluster]
-        select_listing_id = st.selectbox("Choose listing id:", rec_df['listing_id'])
-        index = rec_df['listing_id'].tolist().index(select_listing_id)
-        recomended_listings = get_num_recommendations(rec_df, num_similarity, n, listing_id=select_listing_id)
-
+        select_listing_id_ = st.selectbox("Choose listing id:", rec_df['listing_id'])
+        index = rec_df['listing_id'].tolist().index(select_listing_id_)
+        recomended_listings = get_num_recommendations(rec_df, num_similarity, n, listing_id=select_listing_id_)
     else:
         # get corpus
         df = df.reset_index()
@@ -454,7 +453,7 @@ st.subheader(':green[Pick a top n recommendation for more info]')
 st.caption("(Note: the first listing id is the first recommended listing (the most relevant), and the second listing id is the second recommended rental, and so on.)")
 
 # get a top n listing id from the user
-selected_listing_id = st.selectbox("Choose listing id:", recomended_listings_update['listing_id'])
+selected_listing_id = st.selectbox("Choose wanted listing id:", recomended_listings_update['listing_id'])
 index = recomended_listings_update['listing_id'].tolist().index(selected_listing_id)
 link = recomended_listings_update.listing_url.tolist()[index]
 
@@ -465,7 +464,7 @@ st.write("\"{}\" - [{}]({})".format(recomended_listings_update.listing_name.toli
 wordcloud_STOPWORDS = STOPWORDS
 make_wordcloud(filter_df,'cleaned_content', selected_listing_id, wordcloud_STOPWORDS, mask=None)
 
-########################################################################################################
+#########################################################################################################
 # add rental review wordcloud #
 
 # generate review wordcloud
