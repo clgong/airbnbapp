@@ -455,7 +455,7 @@ st.write("\"{}\" - [{}]({})".format(recomended_listings_update.listing_name.toli
 wordcloud_STOPWORDS = STOPWORDS
 make_wordcloud(filter_df,'cleaned_content', selected_listing_id, wordcloud_STOPWORDS, mask=None)
 
-########################################################################################################
+#########################################################################################################
 # add rental review wordcloud #
 
 # generate review wordcloud
