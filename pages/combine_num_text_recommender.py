@@ -444,7 +444,7 @@ st.header(":blue[Rental description] word cloud")
 st.subheader('Pick a top n recommendation for more info')
 
 # get a top n listing id from the user
-selected_listing_id = st.selectbox("Choose listing id:", recomended_listings_update['listing_id'])
+selected_listing_id = st.selectbox("Choose wanted listing id:", recomended_listings_update['listing_id'])
 index = recomended_listings_update['listing_id'].tolist().index(selected_listing_id)
 link = recomended_listings_update.listing_url.tolist()[index]
 
