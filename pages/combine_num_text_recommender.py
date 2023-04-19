@@ -361,9 +361,9 @@ def get_text_recommendations(df, input_query, _tfidf_matrix, n=5):
 def get_recommendation(df,input_query,_tfidf_matrix, n):
     if input_query == "":
         rec_df = df.loc[df['cluster']==major_cluster]
-        select_listing_id = st.selectbox("Choose listing id:", rec_df['listing_id'])
-        index = rec_df['listing_id'].tolist().index(select_listing_id)
-        recomended_listings = get_num_recommendations(rec_df, num_similarity, n, listing_id=select_listing_id)
+        select_listing_id_ = st.selectbox("Choose listing id:", rec_df['listing_id'])
+        index = rec_df['listing_id'].tolist().index(select_listing_id_)
+        recomended_listings = get_num_recommendations(rec_df, num_similarity, n, listing_id=select_listing_id_)
         
     else:
         # get corpus
