@@ -76,8 +76,8 @@ st.header('Try the recommender which combines the text and numeric features')
 @st.cache_data
 def get_data(price_range,num_of_beds,num_of_bedrooms,num_of_bathrooms):
 
-    df = pd.read_pickle('data/cleaned_v2/cleaned_listing_finalized_for_streamlit.zip')
-    df_cluster = pd.read_pickle('data/cleaned_v2/update_cluster.zip')
+    df = pd.read_pickle('data/data_cleaned/cleaned_listing_finalized_for_streamlit.zip')
+    df_cluster = pd.read_pickle('data/data_cleaned/update_cluster.zip')
     df['cluster'] = df_cluster['cluster']
 
 
@@ -378,7 +378,7 @@ st.write(recomended_listings_update)
 @st.cache_data
 def get_review_data():
     # directly read the saved cleaned_review_with_polarity_and_topic dataset
-    review_df = pd.read_pickle('data/cleaned_v2/cleaned_review_with_polarity_and_topic.zip')
+    review_df = pd.read_pickle('data/data_cleaned/cleaned_review_with_polarity_and_topic.zip')
     return review_df
 review_df = get_review_data()
 
