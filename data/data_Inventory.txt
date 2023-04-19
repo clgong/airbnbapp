@@ -1,0 +1,86 @@
+Final Notebooks and data in the Deepnote
+
+--------------------------------
+   Notebooksin the deep note
+--------------------------------
+
+1. data cleaning
+data_cleaning_calendar
+data_cleaning_listings
+data_cleaning_reviews
+
+
+2. clustering
+cluster_analysis
+
+
+3. EDA
+exploratory_data_analysis
+
+
+4. sentiment analysis
+review_sentiment_analysis
+review_sentiment_analysis_comparison_with_sample_data
+
+
+5. topic modeling
+review_topic_modeling_listing_level
+review_topic_modeling_review_level
+
+
+6. recommender system
+recommender_system_combined
+recommender_system_numeric_content_based
+recommender_system_text_content_based
+recommender_evaluation
+
+
+7. adhoc
+functions_for_a_given_listing
+prepare_dataset_for_streamlit_app
+
+--------------------------------
+  Data in the deep note
+--------------------------------
+
+1. data/data_raw/
+
+calendar.csv.gz
+listings.csv.gz
+reviews.csv.gz
+neighborhoods.geojson
+
+
+2. data/data_cleaned/
+
+cleaned_calendar.zip
+cleaned_listing.zip
+cleaned_review.zip
+cleaned_listing_and_review_with_polarity.zip
+cleaned_listing_and_review_with_polarity_and_text_content.zip
+cleaned_listing_finalized_for_streamlit.zip
+cleaned_review_for_review_wordcloud.zip
+cleaned_review_with_polarity.zip
+cleaned_review_with_polarity_and_topic.zip
+cluster_kmeans_pca.zip
+listing_holdout.zip
+listing_train.zip
+listings_with_cluster_similarity_polarity.zip
+embedding_plot.npy
+tfidf_vectorizer.pk
+
+
+3. data/data_statistics/
+
+699_airbnb_data.xlsx
+(note: this file lists all the columns of the raw datasets, and was used to record how each column was cleaned)
+
+
+4. data/survey/
+
+Combined Airbnb recommender survey_rater_1.xlsx
+Combined Airbnb recommender survey_rater_2.xlsx
+Combined Airbnb recommender survey_rater_3.xlsx
+Text only Airbnb recommender survey_rater_1.xlsx
+Text only Airbnb recommender survey_rater_2.xlsx
+Text only Airbnb recommender survey_rater_3.xlsx
