@@ -46,7 +46,11 @@ Please have a look at the file [How to run our Airbnb project.pdf](https://githu
 
 [SIAD 699 Capstone Project Report - Airbnb Recommender System](https://google.com) 
 
+## Data access statement
+
+We chose three Seattle Airbnb datasets for this project, which was compiled on December 24, 2022, and which can be downloaded from http://insideairbnb.com/get-the-data in CSV format. More detailed information about insideairbnb.com's data use policies can be found at their [data policies page](http://insideairbnb.com/data-policies).
+
 
 ## License
 
-All data sources and libraries are open source to the best of our knowledge. If any issues please contact us at clgong at sign umich.edu
+All data sources and python libraries used are open source to the best of our knowledge. If any issues please contact us at clgong at sign umich.edu
