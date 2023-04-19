@@ -41,7 +41,7 @@ Please have a look at the file [How to run our Airbnb project.pdf](https://githu
      *    locally
      *    Streamlit
      *    AWS
-*    Running our notebooks locally
+*    Accessing our notebooks on DeepNote.com
 
 ## A detailed report on our project can be found here:
 
