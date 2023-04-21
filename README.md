@@ -45,7 +45,7 @@ Please have a look at the file [How to run our Airbnb project.pdf](https://githu
 
 ## A detailed report on our project can be found here:
 
-[SIAD 699 Capstone Project Report - Airbnb Recommender System](https://google.com) 
+[SIAD 699 Capstone Project Report - Airbnb Recommender System - Team-Spirit](https://docs.google.com/document/d/18dRkoxdhbcK_6537p-X6MVaL2HzaynNe2OnuIUDVYC8/edit?usp=sharing)
 
 ## Data access statement
 
