@@ -43,11 +43,11 @@ Please have a look at the file [How to run our Airbnb project.pdf](https://githu
      *    AWS
 *    Accessing our notebooks on DeepNote.com
 
-## Live server running here
+## Live server running here:
 
 This might change from time to time. Check back here in the case address is updated. 
 
-[http://3.93.170.207:8501/](http://http://3.93.170.207:8501/)
+[http://3.93.170.207:8501/](http://3.93.170.207:8501/)
 
 
 ## A detailed report on our project can be found here:
