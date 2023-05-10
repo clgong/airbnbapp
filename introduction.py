@@ -55,4 +55,4 @@ st.markdown("- The text based recommender focuses on using just NLP techniques t
 st.markdown("- The combined recommender uses the same NLP techniques, but also uses some numeric features to see if the results are different. Move the sliders for some numeric values. Then type some text and click \"Confirm\". (If you don't type any text it simply shows a cosine similarity table between the listings).")
 st.markdown("After a search result listing is returned, both recommenders allow the user select a specific rental and see more details about that listing including sentiment analysis as well a review report which extricates just the negative sentences from all reviews, positive or negative.")
 st.markdown("Please try it out and see which recommender returns better results.")
-st.markdown("TODO: UPDATE LINKS: A [full report](https://www.google.com) and [GitHub repo](https://www.yahoo.com) accompany this app. Thanks for trying it out!")
+st.markdown("A [full report](https://docs.google.com/document/d/18dRkoxdhbcK_6537p-X6MVaL2HzaynNe2OnuIUDVYC8) and [GitHub repo](https://github.com/clgong/airbnbapp) accompany this app. Thanks for trying it out!")
