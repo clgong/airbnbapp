@@ -16,7 +16,7 @@ However reading through every review in a large number of listings can be very t
   
 ## Web app screen shot
 
-Here is a quick peak at what the app looks like. Be sure to try it live here: [AirBnb Rentals in Seattle](http://3.234.246.45:8501/)  
+Here is a quick peak at what the app looks like. Be sure to try it live by clicking on the url in the live section below.  
 
 <img width="588" alt="app_screen_shot" src="https://user-images.githubusercontent.com/101086582/232890575-2a0a9c26-87ca-40b7-a04c-23457e3d9615.png">
 
